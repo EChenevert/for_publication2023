@@ -11,6 +11,16 @@ from sklearn import linear_model
 import textwrap
 
 
+def max_interquartile_outlierrm(df, target):
+    Q1 = df[target].quantile(0.25)
+    Q3 = df[target].quantile(0.75)
+    IQR = Q3 - Q1
+
+    # filtered_df = df[~((df[target] < (Q1 - 1.5*IQR)) | (df[target] > (Q3 + 1.5*IQR)))]
+    filtered_df = df[~(df[target] > (Q3 + 1.5 * IQR))]
+    return filtered_df
+
+
 def outlierrm(df, thres=3):
     """Dont put in long lats in here! Need Year and Site name lol"""
     df = df.dropna()  #.set_index(['Simple site', 'level_1'])
@@ -81,7 +91,7 @@ def wrap_labels(ax, width, break_long_words=False):
 
 # https://www.analyticsvidhya.com/blog/2020/10/a-comprehensive-guide-to-feature-selection-using-wrapper-methods-in-python/#:~:text=1.-,Forward%20selection,with%20all%20other%20remaining%20features.
 def backward_elimination(data, target, num_feats=5, significance_level=0.05):
-    target = list(target)
+    # target = list(target)
     features = data.columns.tolist()
     while(len(features)>0):
         features_with_constant = sm.add_constant(data[features])
@@ -114,6 +124,7 @@ def unscaled_weights_from_full_standardization(X, y, bayesianReg: linear_model):
 
     return coefs_new, intercept
 
+
 def unscaled_weights_from_Xstandardized(X, bayesianReg: linear_model):
     """
     https://stackoverflow.com/questions/57513372/can-i-inverse-transform-the-intercept-and-coefficients-of-
@@ -129,9 +140,10 @@ def unscaled_weights_from_Xstandardized(X, bayesianReg: linear_model):
         # print(X.columns.values[x])
         col = X.columns.values[x]
         coefs_new.append((a[x] / (np.asarray(X.std()[col]))))
-    intercept = i - np.sum(np.multiply(np.asarray(coefs_new), np.asarray(X.mean())))  # hadamard product
+    intercept = i - np.sum(np.multiply(np.asarray(coefs_new), np.asarray(X.mean()/X.std())))  # hadamard product
 
     return coefs_new, intercept
+
 
 def ln_transform_weights(coefs):
     exp_coefs = np.exp(coefs)
@@ -499,8 +511,8 @@ def cv_results_and_plot(bay_model, bestfeatures, unscaled_predictor_matrix, pred
     residuals = []
 
     # Performance Metric Containers: I allow use the median because I want to be more robust to outliers
-    r2_total_medians = []  # holds the k-fold median r^2 value. Will be length of 100 due to 100 repeats
-    mae_total_medians = []  # holds the k-fold median Mean Absolute Error (MAE) value. Will be length of 100 due to 100 repeats
+    r2_total_means = []  # holds the k-fold median r^2 value. Will be length of 100 due to 100 repeats
+    mae_total_means = []  # holds the k-fold median Mean Absolute Error (MAE) value. Will be length of 100 due to 100 repeats
 
     # parameter holders
     weight_vector_ls = []  # holds the learned parameters for each k-fold test
@@ -557,7 +569,6 @@ def cv_results_and_plot(bay_model, bestfeatures, unscaled_predictor_matrix, pred
             pred_list += list(ypred)
             pred_certain += list(ystd)
 
-            # Metrics for scaled y: ESSENTIAL
             r2 = r2_score(y_test, ypred)
             r2_ls.append(r2)
             mae = mean_absolute_error(y_test, ypred)
@@ -570,10 +581,10 @@ def cv_results_and_plot(bay_model, bestfeatures, unscaled_predictor_matrix, pred
 
         weight_certainty_ls.append(np.mean(w_certain))
         # Average predictions over the Kfold first: scaled
-        r2_median = np.median(r2_ls)
-        r2_total_medians.append(r2_median)
-        mae_median = np.median(mae_ls)
-        mae_total_medians.append(mae_median)
+        r2_mean = np.mean(r2_ls)
+        r2_total_means.append(r2_mean)
+        mae_mean = np.mean(mae_ls)
+        mae_total_means.append(mae_mean)
 
         predicted = predicted + list(cross_val_predict(bay_model, predictor_matrix, target.values.ravel(), cv=try_cv))
         residuals = residuals + list(target.values.ravel() - cross_val_predict(bay_model, predictor_matrix,
@@ -585,8 +596,8 @@ def cv_results_and_plot(bay_model, bestfeatures, unscaled_predictor_matrix, pred
     unscaled_weight_df = pd.DataFrame(unscaled_w_ls, columns=bestfeatures)
 
     # Now calculate the mean of th kfold means for each repeat: scaled accretion
-    r2_final_median = np.median(r2_total_medians)
-    mae_final_median = np.median(mae_total_medians)
+    r2_final_median = np.mean(r2_total_means)
+    mae_final_median = np.mean(mae_total_means)
 
     # exp10_y_ls = [10 ** y_i for y_i in y_ls]
     # exp10_predicted = [10 ** y_i for y_i in predicted]

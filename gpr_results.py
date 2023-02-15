@@ -1,6 +1,6 @@
 from mlxtend.feature_selection import ExhaustiveFeatureSelector
-from sklearn import linear_model
-
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.gaussian_process.kernels import DotProduct, WhiteKernel
 import matplotlib.pyplot as plt
 from sklearn.metrics import r2_score, mean_absolute_error
 from random import seed
@@ -29,7 +29,8 @@ perc = pd.read_csv(r"D:\Etienne\fall2022\agu_data\percentflooded.csv",
 perc['Simple site'] = [i[:8] for i in perc['Station_ID']]
 perc = perc.groupby('Simple site').median()
 wl = pd.read_csv(r"D:\Etienne\fall2022\agu_data\waterlevelrange.csv",
-                 encoding="unicode escape")[['Station_ID', 'Tide_Amp (ft)']]
+                 encoding="unicode escape")[['Station_ID', 'Tide_Amp (ft)', '10%thLower_flooding (ft)',
+                                             '90%thUpper_flooding (ft)', 'avg_flooding (ft)']]
 wl['Simple site'] = [i[:8] for i in wl['Station_ID']]
 wl = wl.groupby('Simple site').median()
 
@@ -69,7 +70,7 @@ floodDepth = pd.read_csv(r"D:\Etienne\PAPER_2023\CRMS_Continuous_Hydrographic\fl
 ]].set_index('Simple site')
 
 # Concatenate
-df = pd.concat([bysite, distRiver, nearWater, gee, jrc, wl, perc, SEC, floodfreq, floodDepth, acc, marshElev],
+df = pd.concat([bysite, distRiver, nearWater, gee, jrc, marshElev, wl, perc, SEC, acc, floodfreq, floodDepth],
                axis=1, join='outer')
 
 # Now clean the columns
@@ -90,8 +91,8 @@ udf = tdf.drop([
 ], axis=1)
 
 
-# Address the vertical measurement for mass calculation (wit the potential of switching between my accretion and
-# CRMS accretion)
+
+# Address the vertical measurement for mass calculation (multiple potential outcome problem)
 vertical = 'Accretion Rate (mm/yr)'
 if vertical == 'Accretion Rate (mm/yr)':
     udf = udf.drop('Acc_rate_fullterm (cm/y)', axis=1)
@@ -154,15 +155,24 @@ udf = udf.drop('Basins', axis=1)
 # ----
 udf = udf.drop([  # IM BEING RISKY AND KEEP SHALLOW SUBSIDENCE RATE
     'Surface Elevation Change Rate (cm/y)', 'Deep Subsidence Rate (mm/yr)', 'RSLR (mm/yr)', 'SEC Rate (mm/yr)',
-    # 'Shallow Subsidence Rate (mm/yr)',  # potentially encoding info about accretion
+    'Shallow Subsidence Rate (mm/yr)',  # potentially encoding info about accretion
     # taking out water level features because they are not super informative
     # Putting Human in the loop
+    # '90th%Upper_water_level (ft NAVD88)', '10%thLower_water_level (ft NAVD88)', 'avg_water_level (ft NAVD88)',
+    # 'std_deviation_water_level(ft NAVD88)',
     'Staff Gauge (ft)', 'Soil Salinity (ppt)',
+
+
     'river_width_mean_km',   # 'log_river_width_mean_km',  # i just dont like this variable because it has a sucky distribution
 
     # Delete the dominant herb cuz of rendundancy with dominant veg
     'Average Height Herb (cm)',
-
+    # 'tss med mg/l',  # cuz idk if i trust calc..... eh
+    # # Taking these flood depth variables out becuase I compute them myself better!!!!
+    # 'std_deviation_avg_flooding (ft)',  # cuz idk how it differs from tide amp, is diff correlated as well from SHAP
+    'avg_flooding (ft)',  # remove because I now calcuate flooding depth when flooded
+    '10%thLower_flooding (ft)',  # same reason as above AND i compute myself
+    '90%thUpper_flooding (ft)',
     # other weird ones
     'Soil Porewater Temperature (°C)',
     'Average_Marsh_Elevation (ft. NAVD88)',
@@ -175,12 +185,8 @@ udf = udf.drop([  # IM BEING RISKY AND KEEP SHALLOW SUBSIDENCE RATE
 #                                          'Organic Matter (%)'], axis=1), thres=3, num=1)
 # rdf = funcs.informed_outlierRm(udf.drop(['Community', 'Latitude', 'Longitude', 'Bulk Density (g/cm3)',
 #                                          'Organic Matter (%)'], axis=1), thres=2, num=2)
-# rdf = funcs.informed_outlierRm(udf.drop(['Community', 'Latitude', 'Longitude',  # 'Bulk Density (g/cm3)', 'Organic Matter (%)'
-#                                          ], axis=1), thres=10, num=1)
-rdf = funcs.max_interquartile_outlierrm(udf.drop(['Community', 'Latitude', 'Longitude',  # 'Bulk Density (g/cm3)', 'Organic Matter (%)'
-                                         ], axis=1).dropna(), outcome)
-# rdf = funcs.outlierrm_outcome(udf.drop(['Community', 'Latitude', 'Longitude',  # 'Bulk Density (g/cm3)', 'Organic Matter (%)'
-#                                          ], axis=1), thres=2, target='Shallow Subsidence Rate (mm/yr)')
+rdf = funcs.outlierrm_outcome(udf.drop(['Community', 'Latitude', 'Longitude', 'Bulk Density (g/cm3)',
+                                         'Organic Matter (%)'], axis=1), thres=2, target=outcome)
 # transformations (basically log transforamtions) --> the log actually kinda regularizes too
 rdf['log_distance_to_water_km'] = [np.log(val) if val > 0 else 0 for val in rdf['distance_to_water_km']]
 # rdf['log_river_width_mean_km'] = [np.log(val) if val > 0 else 0 for val in rdf['river_width_mean_km']]
@@ -190,15 +196,46 @@ rdf['log_distance_to_river_km'] = [np.log(val) if val > 0 else 0 for val in rdf[
 # rdf['Average Height Herb (mm)'] = rdf['Average Height Herb (cm)'] * 10
 # drop the old features
 rdf = rdf.drop(['distance_to_water_km', 'distance_to_river_km'], axis=1)  # 'distance_to_ocean_km'
+# Now it is feature selection time
+# drop any variables related to the outcome
+# rdf = rdf.drop([  # IM BEING RISKY AND KEEP SHALLOW SUBSIDENCE RATE
+#     'Surface Elevation Change Rate (cm/y)', 'Deep Subsidence Rate (mm/yr)', 'RSLR (mm/yr)', 'SEC Rate (mm/yr)',
+#     'Shallow Subsidence Rate (mm/yr)',  # potentially encoding info about accretion
+#     # taking out water level features because they are not super informative
+#     # Putting Human in the loop
+#     # '90th%Upper_water_level (ft NAVD88)', '10%thLower_water_level (ft NAVD88)', 'avg_water_level (ft NAVD88)',
+#     # 'std_deviation_water_level(ft NAVD88)',
+#     'Staff Gauge (ft)', 'Soil Salinity (ppt)',
+#     'log_river_width_mean_km',  # i just dont like this variable because it has a sucky distribution
+#     # Delete the dominant herb cuz of rendundancy with dominant veg
+#     'Average Height Herb (cm)',
+#     # 'tss med mg/l',  # cuz idk if i trust calc..... eh
+#     # # Taking these flood depth variables out becuase I compute them myself better!!!!
+#     # 'std_deviation_avg_flooding (ft)',  # cuz idk how it differs from tide amp, is diff correlated as well from SHAP
+#     'avg_flooding (ft)',  # remove because I now calcuate flooding depth when flooded
+#     '10%thLower_flooding (ft)',  # same reason as above AND i compute myself
+#     '90%thUpper_flooding (ft)',
+#     # other weird ones
+#     'Soil Porewater Temperature (°C)',
+#     'Average_Marsh_Elevation (ft. NAVD88)',
+#     'Bulk Density (g/cm3)',  'Organic Density (g/cm3)',
+#     'Soil Moisture Content (%)',  'Organic Matter (%)',  # do not use organic matter because it has a negative relationship, hard for me to interpret --> i think just picks up the bulk density relationship. Or relationship that sites with higher organic matter content tend to have less accretion
+#     'land_lost_km2'
+# ], axis=1)
 
 # Rename some variables for better text wrapping
 rdf = rdf.rename(columns={
     'Tide_Amp (ft)': 'Tide Amp (ft)',
     'avg_percentflooded (%)': 'Avg. Time Flooded (%)',
     'windspeed': 'Windspeed (m/s)',
-
+    # 'log_distance_to_ocean_km': 'log distance to ocean km',
+    # 'Average_Marsh_Elevation (ft. NAVD88)': 'Average Marsh Elevation (ft. NAVD88)',
     'log_distance_to_water_km': 'Log Distance to Water (km)',
     'log_distance_to_river_km': 'Log Distance to River (km)',
+    '10%thLower_flooding (ft)': '10th Percentile of Waterlevel to Marsh (ft)',
+    '90%thUpper_flooding (ft)': '90th Percentile of Waterlevel to Marsh (ft)',
+    'avg_flooding (ft)': 'Avg. Waterlevel to Marsh (ft)',
+    'std_deviation_avg_flooding (ft)': 'Std. Deviation of Flooding (ft)',
     # My flood depth vars
     '90th Percentile Flood Depth when Flooded (ft)': '90th Percentile Flood Depth (ft)',
     '10th Percentile Flood Depth when Flooded (ft)': '10th Percentile Flood Depth (ft)',
@@ -214,6 +251,10 @@ gdf['90th Percentile Flood Depth (cm)'] = gdf['90th Percentile Flood Depth (ft)'
 gdf['10th Percentile Flood Depth (cm)'] = gdf['10th Percentile Flood Depth (ft)'] * 30.48
 gdf['Avg. Flood Depth (cm)'] = gdf['Avg. Flood Depth (ft)'] * 30.48
 gdf['Std. Deviation Flood Depth (cm)'] = gdf['Std. Deviation Flood Depth (ft)'] * 30.48
+# gdf['10th Percentile of Waterlevel to Marsh (cm)'] = gdf['10th Percentile of Waterlevel to Marsh (ft)'] * 30.48
+# gdf['90th Percentile of Waterlevel to Marsh (cm)'] = gdf['90th Percentile of Waterlevel to Marsh (ft)'] * 30.48
+# gdf['Avg. Waterlevel to Marsh (cm)'] = gdf['Avg. Waterlevel to Marsh (ft)'] * 30.48
+# gdf['Std. Deviation of Flooding (cm)'] = gdf['Std. Deviation of Flooding (ft)'] * 30.48
 
 # Delete the old non SI unit variables
 gdf = gdf.drop(['Std. Deviation Flood Depth (ft)', 'Avg. Flood Depth (ft)', '10th Percentile Flood Depth (ft)',
@@ -222,208 +263,172 @@ gdf = gdf.drop(['Std. Deviation Flood Depth (ft)', 'Avg. Flood Depth (ft)', '10t
 # Export gdf to file specifically for AGU data and results
 gdf.to_csv("D:\\Etienne\\fall2022\\agu_data\\results\\AGU_dataset.csv")
 
-# split into marsh datasets
 
-brackdf = gdf[gdf['Community'] == 'Brackish']
-saldf = gdf[gdf['Community'] == 'Saline']
-freshdf = gdf[gdf['Community'] == 'Freshwater']
-interdf = gdf[gdf['Community'] == 'Intermediate']
-combined = gdf[(gdf['Community'] == 'Intermediate') | (gdf['Community'] == 'Brackish')]
-freshinter = gdf[(gdf['Community'] == 'Intermediate') | (gdf['Community'] == 'Freshwater')]
-bracksal = gdf[(gdf['Community'] == 'Saline') | (gdf['Community'] == 'Brackish')]
-# Exclude swamp
-marshdic = {'All': gdf, 'Brackish': brackdf, 'Saline': saldf, 'Freshwater': freshdf, 'Intermediate': interdf,
-            'Intermediate and Brackish': combined, 'Freshwater and Intermediate': freshinter,
-            'Brackish and Saline': bracksal}
+### --- Begin the GPR regression --- ###
 
+### We will only compute the GPR for the whole dataset --> found that it was the most efficent
+predictors = gdf.drop([outcome, 'Community', 'Longitude', 'Latitude', 'Organic Matter (%)', 'Bulk Density (g/cm3)'], axis=1)
+target = gdf[outcome]
+# Scale
+scalar = StandardScaler()
+predictors_scaled = pd.DataFrame(scalar.fit_transform(predictors), columns=predictors.columns.values)
+# Set the kernel for GPR
 
-hold_marsh_weights = {}
-hold_unscaled_weights = {}
-hold_intercept = {}
-hold_marsh_regularizors = {}
-hold_marsh_weight_certainty = {}
-hold_prediction_certainty = {}
+# # Could make the excuse that it is too computationally expensive to do this calculation and therefore backward \
+# feature selection is preferable... a lil weird tho... tends to linear relationships
 
-for key in marshdic:
-    print(key)
-    mdf = marshdic[key]  # .drop('Community', axis=1)
-    # It is preshuffled so i do not think ordering will be a problem
-    # t = np.log10(mdf[outcome].reset_index().drop('index', axis=1))
-    t = mdf[outcome].reset_index().drop('index', axis=1)
-    phi = mdf.drop([outcome, 'Community', 'Latitude', 'Longitude', 'Organic Matter (%)', 'Bulk Density (g/cm3)',
-                    'Shallow Subsidence Rate (mm/yr)'],
-                   axis=1).reset_index().drop('index', axis=1)
-    # Scale: because I want feature importances
-    scalar_Xmarsh = StandardScaler()
-    predictors_scaled = pd.DataFrame(scalar_Xmarsh.fit_transform(phi), columns=phi.columns.values)
-    # NOTE: I do feature selection using whole dataset because I want to know the imprtant features rather than making a generalizable model
-    br = linear_model.BayesianRidge(fit_intercept=True)
+# gpr = GaussianProcessRegressor(kernel=kernel, n_restarts_optimizer=10, random_state=0, alpha=0.5)
+#
+# feature_selector = ExhaustiveFeatureSelector(gpr, min_features=1, max_features=len(predictors_scaled.columns.values),
+#                                             scoring='neg_mean_absolute_error', cv=3)
+#
+# efs = feature_selector.fit(predictors_scaled, target.values.ravel())
+# print('Best Subset (feature names): ', efs.best_feature_names_)
+#
+# X = predictors[list(efs.best_feature_names_)]
 
-    # feature_selector = ExhaustiveFeatureSelector(br,
-    #                                                  min_features=1,
-    #                                                  max_features=len(phi.columns.values),
-    #                                                  # I should only use 5 features (15 takes waaaaay too long)
-    #                                                  scoring='neg_mean_absolute_error',
-    #                                                  # print_progress=True,
-    #                                                  cv=3)  # 3 fold cross-validation
-    #
-    # efsmlr = feature_selector.fit(predictors_scaled, t.values.ravel())
-    #
-    # print('Best CV r2 score: %.2f' % efsmlr.best_score_)
-    # print('Best subset (indices):', efsmlr.best_idx_)
-    # print('Best subset (corresponding names):', efsmlr.best_feature_names_)
-    #
-    # bestfeaturesM = list(efsmlr.best_feature_names_)
+# # Backward feature elimination
+# bestfeatures = funcs.backward_elimination(data=predictors_scaled, target=target, num_feats=20, significance_level=0.05)
+# X = predictors_scaled[bestfeatures]
 
-    bestfeaturesM = funcs.backward_elimination(predictors_scaled, t, num_feats=20, significance_level=0.05)
+##### I decide to use features that are informed by my split dataset BLR tests
+# bestfeatures = ['Tidal Amplitude (cm)', 'NDVI', 'TSS (mg/l)', 'Avg. Flood Depth (cm)', '90th Percentile Flood Depth (cm)',
+#                 '10th Percentile Flood Depth (cm)', 'Avg. Time Flooded (%)', 'Soil Porewater Salinity (ppt)']
+# bestfeatures = ['Tidal Amplitude (cm)', 'TSS (mg/l)', 'Avg. Flood Depth (cm)', '90th Percentile Flood Depth (cm)',
+#                 'Soil Porewater Salinity (ppt)']
+# bestfeatures = ['Tidal Amplitude (cm)', 'TSS (mg/l)', 'Avg. Flood Depth (cm)', '90th Percentile Flood Depth (cm)',
+#                 'Soil Porewater Salinity (ppt)', 'NDVI']
+bestfeatures = ['Tidal Amplitude (cm)', 'TSS (mg/l)', 'Avg. Flood Depth (cm)', 'Std. Deviation Flood Depth (cm)',
+                'Soil Porewater Salinity (ppt)', 'NDVI']
+X = predictors_scaled[bestfeatures]
+#
+# kernel = (DotProduct() ** 2) + WhiteKernel()
+# gpr = GaussianProcessRegressor(kernel=kernel, n_restarts_optimizer=10, random_state=0, alpha=0.5)
+# feature_selector = ExhaustiveFeatureSelector(gpr,
+#                                                  min_features=1,
+#                                                  max_features=len(predictors_scaled.columns.values),
+#                                                  # I should only use 5 features (15 takes waaaaay too long)
+#                                                  scoring='neg_mean_absolute_error',
+#                                                  # print_progress=True,
+#                                                  cv=5)  # 3 fold cross-validation
+#
+# efsmlr = feature_selector.fit(predictors_scaled, target.values.ravel())
+#
+# print('Best CV r2 score: %.2f' % efsmlr.best_score_)
+# print('Best subset (indices):', efsmlr.best_idx_)
+# print('Best subset (corresponding names):', efsmlr.best_feature_names_)
+#
+# bestfeatures = list(efsmlr.best_feature_names_)
+#
+# X = predictors_scaled[bestfeatures]
 
-    # bestfeaturesM = funcs.backward_elimination(predictors_scaled, t.values.ravel(), num_feats=100,
-    #                                            significance_level=0.01)
+# ### Now for the actual testing.
+# rcv = RepeatedKFold(n_splits=5, n_repeats=100, random_state=123)
+# scores = cross_validate(gpr, X, target, cv=rcv)
 
-    # Lets conduct the Bayesian Ridge Regression on this dataset: do this because we can regularize w/o cross val
-    #### NOTE: I should do separate tests to determine which split of the data is optimal ######
-    # first split data set into test train
-    from sklearn.model_selection import train_test_split, cross_val_score, RepeatedKFold
+# Visualize manual cross validation
 
-    X, y = predictors_scaled[bestfeaturesM], t
+# Performance Metric Containers: I allow use the median because I want to be more robust to outliers
+r2_total_medians = []  # holds the k-fold median r^2 value. Will be length of 100 due to 100 repeats
+mae_total_medians = []  # holds the k-fold median Mean Absolute Error (MAE) value. Will be length of 100 due to 100 repeats
 
-    baymod = linear_model.BayesianRidge(fit_intercept=True)
+predicted = []
+y_ls = []
 
-    results_dict = funcs.cv_results_and_plot(baymod, bestfeaturesM, phi, X, y, {'cmap': 'YlOrRd', 'line': "r--"}, str(key))
+prediction_certainty_ls = []
+prediction_list = []
 
-    hold_marsh_weights[key] = results_dict["Scaled Weights"]
-    hold_unscaled_weights[key] = results_dict["Unscaled Weights"]
-    hold_marsh_regularizors[key] = results_dict["Scaled regularizors"]
-    hold_marsh_weight_certainty[key] = results_dict["# Well Determined Weights"]
-    hold_prediction_certainty[key] = results_dict["Standard Deviations of Predictions"]
-    hold_intercept[key] = results_dict["Unscaled Intercepts"]
+for i in range(100):  # for 100 repeats
+    try_cv = KFold(n_splits=5, shuffle=True)
 
-# Make a colormap so all each weight will have a specific color
-colormap = {
-'Soil Porewater Salinity (ppt)': '#DD8A8A',
-'Average Height Dominant (cm)': '#137111',
-'NDVI': '#0AFF06',
-'TSS (mg/l)': '#8E6C02',
-'Windspeed (m/s)': '#70ECE3',
-'Tidal Amplitude (cm)': '#434F93',
-'Avg. Flood Depth (cm)': '#087AFA',
-# 'Avg. Waterlevel to Marsh (ft)':  '#087AFD',
-# '90th Percentile of Waterlevel to Marsh (ft)': '#D001A1',
-'90th Percentile Flood Depth (cm)': '#D000E1',
-# '10th Percentile of Waterlevel to Marsh (ft)': '#73ABAE',
-'10th Percentile Flood Depth (cm)': '#73ACAE',
-# 'Std. Deviation of Flooding (ft)': '#DE5100',
-'Std. Deviation Flood Depth (cm)': '#DE5100',
-'Avg. Time Flooded (%)': '#970CBD',
-'Flood Freq (Floods/yr)': '#EB0000',
-'Log Distance to Water (km)': '#442929',
-'Log Distance to River (km)': '#045F38',
-}
+    # errors
+    r2_ls = []
+    mae_ls = []
+    # predictions
+    pred_certain = []
+    pred_list = []
 
-for key in hold_marsh_weights:
-    d = pd.DataFrame(hold_marsh_weights[key].mean().reset_index()).rename(columns={0: 'Means'})
-    sns.set_theme(style='white', font_scale=1.4)
-    fig, ax = plt.subplots(figsize=(11, 8))
-    ax.set_ylabel("Relative Feature Importance")
-    # my_cmap = plt.get_cmap("cool")
-    # ax.bar(list(d['index']), list(d['Means']), color='Blue')
-    ax.set_title(str(key) + " CRMS Stations")
-    # sns.barplot(data=hold_marsh_weights[key], palette="Blues")
-    palette_ls = []
-    for weight in d['index']:
-        palette_ls.append(colormap[weight])
-    sns.barplot(list(d['index']), list(d['Means']), palette=palette_ls)
-    funcs.wrap_labels(ax, 10)
-    fig.subplots_adjust(bottom=0.3)
-    fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\" + str(key) +
-                "_scaledX_nolog_boxplot_human.eps", format='eps',
-                dpi=300,
-                bbox_inches='tight')
-    plt.show()
+    for train_index, test_index in try_cv.split(X):
+        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+        y_train, y_test = target.iloc[train_index], target.iloc[test_index]
+        # Fit the model
+        kernel = (DotProduct() ** 2) + WhiteKernel()
+        gpr = GaussianProcessRegressor(kernel=kernel, n_restarts_optimizer=10, random_state=0, alpha=0.5)
 
-# Plot the distribution of weight parameters for the marsh runs
-for key in hold_unscaled_weights:
-    sns.set_theme(style='white', font_scale=1.4)
-    fig, ax = plt.subplots(figsize=(11, 8))
-    ax.set_ylabel("Rescaled Weight Coefficients")
-    # matplotlib.rcParams['pdf.fonttype'] = 42
-    ax.set_title(str(key) + " CRMS Stations")
-    ax.axhline(0, ls='--')
-    # if key != 'Saline':
-    #     ax.axhline(0, ls='--')
-    palette_ls = []
-    for weight in hold_unscaled_weights[key].keys():
-        palette_ls.append(colormap[weight])
-    boxplot = sns.boxplot(data=hold_unscaled_weights[key], notch=True, showfliers=False, palette=palette_ls)
-    funcs.wrap_labels(ax, 10)
-    fig.subplots_adjust(bottom=0.3)
-    fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\" + str(
-        key) + "_unscaledWeights_nolog_boxplot_human.eps", format='eps',
-                dpi=300,
-                bbox_inches='tight')
-    plt.show()
+        gpr.fit(np.asarray(X_train), np.asarray(y_train))
+        # predict
+        ypred, ystd = gpr.predict(X_test, return_std=True)
+        pred_list += list(ypred)
+        pred_certain += list(ystd)
+
+        r2 = r2_score(y_test, ypred)
+        r2_ls.append(r2)
+        mae = mean_absolute_error(y_test, ypred)
+        mae_ls.append(mae)
+
+    # Average certainty in predictions
+    prediction_certainty_ls.append(np.mean(pred_certain))
+    prediction_list.append(pred_list)
+
+    # Average predictions over the Kfold first: scaled
+    r2_median = np.median(r2_ls)
+    r2_total_medians.append(r2_median)
+    mae_median = np.median(mae_ls)
+    mae_total_medians.append(mae_median)
+
+    predicted = predicted + list(cross_val_predict(gpr, X, target.values.ravel(), cv=try_cv))
+    y_ls += list(target.values.ravel())
 
 
-# Plot the distribution of the eff_reg parameter for each run
-eff_reg_df = pd.DataFrame(hold_marsh_regularizors)
-sns.set_theme(style='white', font_scale=1)
-fig, ax = plt.subplots(figsize=(6, 4))
-# matplotlib.rcParams['pdf.fonttype'] = 42
-ax.set_title('Distribution of Learned Effective Regularization Parameters')
-sns.boxplot(data=eff_reg_df, notch=True, showfliers=False, palette="YlOrBr")
-funcs.wrap_labels(ax, 10)
-fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\regularization_scaledX_nolog_boxplot_human.eps",
+# Now calculate the mean of th kfold means for each repeat: scaled accretion
+r2_final_median = np.median(r2_total_medians)
+mae_final_median = np.median(mae_total_medians)
+
+plt.rcParams.update({'font.size': 16})
+fig, ax = plt.subplots(figsize=(9, 8))
+hb = ax.hexbin(x=y_ls,
+               y=predicted,
+               gridsize=30, edgecolors='grey',
+               cmap='YlOrRd', mincnt=1)
+ax.set_facecolor('white')
+ax.set_xlabel("Measured Accretion Rate (mm/yr)")
+ax.set_ylabel("Estimated Accretion Rate (mm/yr)")
+ax.set_title("All CRMS Stations GPR")
+cb = fig.colorbar(hb, ax=ax)
+cb.ax.get_yaxis().labelpad = 20
+cb.set_label('Density of Predictions', rotation=270)
+
+ax.plot([target.min(), target.max()], [target.min(), target.max()],
+        "k--", lw=3)
+
+ax.annotate("Median r-squared = {:.3f}".format(r2_final_median), xy=(20, 410), xycoords='axes points',
+            bbox=dict(boxstyle='round', fc='w'),
+            size=15, ha='left', va='top')
+ax.annotate("Median MAE = {:.3f}".format(mae_final_median), xy=(20, 380), xycoords='axes points',
+            bbox=dict(boxstyle='round', fc='w'),
+            size=15, ha='left', va='top')
+plt.show()
+
+fig.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\cross_validation.eps",
             format='eps',
             dpi=300,
             bbox_inches='tight')
-plt.show()
 
 
-# Plot the distribution of the certainty of parameters for each run
-certainty_df = pd.DataFrame(hold_marsh_weight_certainty)
-sns.set_theme(style='white', rc={'figure.dpi': 147},
-              font_scale=0.7)
-fig, ax = plt.subplots(figsize=(6, 4))
-# matplotlib.rcParams['pdf.fonttype'] = 42
-ax.set_title('Distribution of Calculated Number of Well Determined Parameters')
-sns.boxplot(data=certainty_df, notch=True, showfliers=False, palette="Blues")
-funcs.wrap_labels(ax, 10)
-fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\certainty_scaledX_nolog_boxplot_human.eps",
-            format='eps',
-            dpi=300,
-            bbox_inches='tight')
-plt.show()
+# SHAP analysis
+import shap
+
+# Sampling and shap computation for explanation
+gpr.fit(X, target)
+X500 = shap.utils.sample(X, 500)
+print(type(X500))
+
+explainer = shap.Explainer(gpr.predict, X500)
+shap_values = explainer(X)
+
+# Summary plot
+shap.summary_plot(shap_values, features=X, feature_names=X.columns)
 
 
 
-# Plot the distribution calculated intercepts
-intercept_df = pd.DataFrame(hold_intercept)
-sns.set_theme(style='white', rc={'figure.dpi': 147}, font_scale=0.7)
-fig, ax = plt.subplots(figsize=(6, 4))
-# matplotlib.rcParams['pdf.fonttype'] = 42
-ax.set_title('Distribution of Intercepts [Unscaled]:')
-ax.axhline(0, ls='--')
-sns.boxplot(data=intercept_df, notch=True, showfliers=False, palette="coolwarm")
-funcs.wrap_labels(ax, 10)
-fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\intercepts_nolog_boxplot_human.eps", dpi=300,
-            format='eps',
-            bbox_inches='tight')
-plt.show()
 
-
-# Plot the distribution of the certainty of predictions for each run
-pred_certainty_df = pd.DataFrame(hold_prediction_certainty)
-sns.set_theme(style='white', rc={'figure.dpi': 147},
-              font_scale=0.7)
-fig, ax = plt.subplots(figsize=(6, 4))
-# matplotlib.rcParams['pdf.fonttype'] = 42
-ax.set_title('Distribution of Bayesian Uncertainty in Predictions')
-sns.boxplot(data=pred_certainty_df, notch=True, showfliers=False, palette="Reds")
-funcs.wrap_labels(ax, 10)
-fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\pred_certainty_scaledX_nolog_boxplot_human.eps",
-            dpi=300, format='eps',
-            bbox_inches='tight')
-plt.show()
-
-# Following https://christophm.github.io/interpretable-ml-book/limo.html for individual feature importances
-# Want to show points for the 10th, 25th, 50th, 75th, 90th poins of outcome and their feature effects
