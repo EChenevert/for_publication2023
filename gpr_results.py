@@ -185,8 +185,8 @@ udf = udf.drop([  # IM BEING RISKY AND KEEP SHALLOW SUBSIDENCE RATE
 #                                          'Organic Matter (%)'], axis=1), thres=3, num=1)
 # rdf = funcs.informed_outlierRm(udf.drop(['Community', 'Latitude', 'Longitude', 'Bulk Density (g/cm3)',
 #                                          'Organic Matter (%)'], axis=1), thres=2, num=2)
-rdf = funcs.outlierrm_outcome(udf.drop(['Community', 'Latitude', 'Longitude', 'Bulk Density (g/cm3)',
-                                         'Organic Matter (%)'], axis=1), thres=2, target=outcome)
+rdf = funcs.max_interquartile_outlierrm(udf.drop(['Community', 'Latitude', 'Longitude', 'Bulk Density (g/cm3)',
+                                         'Organic Matter (%)'], axis=1).dropna(), target=outcome)
 # transformations (basically log transforamtions) --> the log actually kinda regularizes too
 rdf['log_distance_to_water_km'] = [np.log(val) if val > 0 else 0 for val in rdf['distance_to_water_km']]
 # rdf['log_river_width_mean_km'] = [np.log(val) if val > 0 else 0 for val in rdf['river_width_mean_km']]
@@ -263,6 +263,8 @@ gdf = gdf.drop(['Std. Deviation Flood Depth (ft)', 'Avg. Flood Depth (ft)', '10t
 # Export gdf to file specifically for AGU data and results
 gdf.to_csv("D:\\Etienne\\fall2022\\agu_data\\results\\AGU_dataset.csv")
 
+# # ------------------------ Check if i get rid of 0 TSS values ---------------------------------------------
+# gdf = gdf[gdf['TSS (mg/l)'] != 0]
 
 ### --- Begin the GPR regression --- ###
 
@@ -298,8 +300,10 @@ predictors_scaled = pd.DataFrame(scalar.fit_transform(predictors), columns=predi
 #                 'Soil Porewater Salinity (ppt)']
 # bestfeatures = ['Tidal Amplitude (cm)', 'TSS (mg/l)', 'Avg. Flood Depth (cm)', '90th Percentile Flood Depth (cm)',
 #                 'Soil Porewater Salinity (ppt)', 'NDVI']
-bestfeatures = ['Tidal Amplitude (cm)', 'TSS (mg/l)', 'Avg. Flood Depth (cm)', 'Std. Deviation Flood Depth (cm)',
+bestfeatures = ['Tidal Amplitude (cm)', 'TSS (mg/l)', '90th Percentile Flood Depth (cm)',
                 'Soil Porewater Salinity (ppt)', 'NDVI']
+# # bestfeatures = ['Tidal Amplitude (cm)', 'TSS (mg/l)', 'Avg. Flood Depth (cm)', 'Std. Deviation Flood Depth (cm)',
+# #                 'Soil Porewater Salinity (ppt)', 'NDVI']
 X = predictors_scaled[bestfeatures]
 #
 # kernel = (DotProduct() ** 2) + WhiteKernel()
@@ -418,6 +422,12 @@ fig.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\cross_validation.eps",
 # SHAP analysis
 import shap
 
+# Rename X to "Standardized Variables" this way it is clear that the variable distributions are standardized
+X = X.rename(columns={'Tidal Amplitude (cm)': 'Tidal Amplitude (*)',
+                      'NDVI': 'NDVI (*)',
+                      '90th Percentile Flood Depth (cm)': '90th Percentile Flood Depth (*)',
+                      'TSS (mg/l)': 'TSS (*)',
+                      'Soil Porewater Salinity (ppt)': 'Soil Porewater Salinity (*)'})
 # Sampling and shap computation for explanation
 gpr.fit(X, target)
 X500 = shap.utils.sample(X, 500)
@@ -426,9 +436,57 @@ print(type(X500))
 explainer = shap.Explainer(gpr.predict, X500)
 shap_values = explainer(X)
 
+plt.figure()
 # Summary plot
-shap.summary_plot(shap_values, features=X, feature_names=X.columns)
+shap.summary_plot(shap_values, features=X, feature_names=X.columns, plot_size=[30, 5], show=False)
+plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\shap_summaryplot.pdf", format="pdf", dpi=300, bbox_inches='tight')
+# Summary heat map
+plt.figure()
+shap.plots.heatmap(shap_values, instance_order=shap_values.sum(1), show=False)
+plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\summary_heatmap.pdf", format="pdf", dpi=300, bbox_inches='tight')
+
+# Partial and SHAP dependence for Tidal Amplitude
+plt.figure()
+shap.partial_dependence_plot('Tidal Amplitude (*)', gpr.predict, X500, ice=False, model_expected_value=True,
+                             feature_expected_value=True, show=False)
+plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\tidalAmplitude_partial.pdf", format="pdf", dpi=300, bbox_inches='tight')
+shap.plots.scatter(shap_values[:, 'Tidal Amplitude (*)'], color=shap_values[:, '90th Percentile Flood Depth (*)'],
+                   show=False)
+plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\tidalAmplitude_partialSHAP.pdf", format="pdf", dpi=300, bbox_inches='tight')
 
 
+# Partial and SHAP dependence for 90th flood depth
+plt.figure()
+shap.partial_dependence_plot('90th Percentile Flood Depth (*)', gpr.predict, X500, ice=False, model_expected_value=True,
+                             feature_expected_value=True, show=False)
+plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\90flooddepth_partial.pdf", format="pdf", dpi=300, bbox_inches='tight')
+shap.plots.scatter(shap_values[:, '90th Percentile Flood Depth (*)'], color=shap_values[:, 'Tidal Amplitude (*)'],
+                   show=False)
+plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\90flodddepth_partialSHAP.pdf", format="pdf", dpi=300, bbox_inches='tight')
 
+# partial and SHAP for NDVI
+plt.figure()
+shap.partial_dependence_plot('NDVI (*)', gpr.predict, X500, ice=False, model_expected_value=True,
+                             feature_expected_value=True, show=False)
+plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\NDVI_partial.pdf", format="pdf", dpi=300, bbox_inches='tight')
+shap.plots.scatter(shap_values[:, 'NDVI (*)'], color=shap_values[:, 'Soil Porewater Salinity (*)'],
+                   show=False)
+plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\NDVI_partialSHAP.pdf", format="pdf", dpi=300, bbox_inches='tight')
 
+# ppartial and SHAP for salinity
+plt.figure()
+shap.partial_dependence_plot('Soil Porewater Salinity (*)', gpr.predict, X500, ice=False, model_expected_value=True,
+                             feature_expected_value=True, show=False)
+plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\salinity_partial.pdf", format="pdf", dpi=300, bbox_inches='tight')
+shap.plots.scatter(shap_values[:, 'Soil Porewater Salinity (*)'], color=shap_values[:, 'NDVI (*)'],
+                   show=False)
+plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\salinity_partialSHAP.pdf", format="pdf", dpi=300, bbox_inches='tight')
+
+# partial and SHAP for TSS
+plt.figure()
+shap.partial_dependence_plot('TSS (*)', gpr.predict, X500, ice=False, model_expected_value=True,
+                             feature_expected_value=True, show=False)
+plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\TSS_partial.pdf", format="pdf", dpi=300, bbox_inches='tight')
+shap.plots.scatter(shap_values[:, 'TSS (*)'], color=shap_values[:, 'Soil Porewater Salinity (*)'],
+                   show=False)
+plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\TSS_partialSHAP.pdf", format="pdf", dpi=300, bbox_inches='tight')

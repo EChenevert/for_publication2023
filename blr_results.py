@@ -72,6 +72,8 @@ floodDepth = pd.read_csv(r"D:\Etienne\PAPER_2023\CRMS_Continuous_Hydrographic\fl
 df = pd.concat([bysite, distRiver, nearWater, gee, jrc, wl, perc, SEC, floodfreq, floodDepth, acc, marshElev],
                axis=1, join='outer')
 
+df.to_csv("D:\\Etienne\\fall2022\\agu_data\\results\\minimal_preprocessing.csv")
+
 # Now clean the columns
 # First delete columns that are more than 1/2 nans
 tdf = df.dropna(thresh=df.shape[0]*0.5, how='all', axis=1)
@@ -154,7 +156,7 @@ udf = udf.drop('Basins', axis=1)
 # ----
 udf = udf.drop([  # IM BEING RISKY AND KEEP SHALLOW SUBSIDENCE RATE
     'Surface Elevation Change Rate (cm/y)', 'Deep Subsidence Rate (mm/yr)', 'RSLR (mm/yr)', 'SEC Rate (mm/yr)',
-    # 'Shallow Subsidence Rate (mm/yr)',  # potentially encoding info about accretion
+    'Shallow Subsidence Rate (mm/yr)',  # potentially encoding info about accretion
     # taking out water level features because they are not super informative
     # Putting Human in the loop
     'Staff Gauge (ft)', 'Soil Salinity (ppt)',
@@ -177,8 +179,8 @@ udf = udf.drop([  # IM BEING RISKY AND KEEP SHALLOW SUBSIDENCE RATE
 #                                          'Organic Matter (%)'], axis=1), thres=2, num=2)
 # rdf = funcs.informed_outlierRm(udf.drop(['Community', 'Latitude', 'Longitude',  # 'Bulk Density (g/cm3)', 'Organic Matter (%)'
 #                                          ], axis=1), thres=10, num=1)
-rdf = funcs.max_interquartile_outlierrm(udf.drop(['Community', 'Latitude', 'Longitude',  # 'Bulk Density (g/cm3)', 'Organic Matter (%)'
-                                         ], axis=1).dropna(), outcome)
+rdf = funcs.max_interquartile_outlierrm(udf.drop(['Community', 'Latitude', 'Longitude', 'Bulk Density (g/cm3)',
+                                                  'Organic Matter (%)'], axis=1).dropna(), outcome)
 # rdf = funcs.outlierrm_outcome(udf.drop(['Community', 'Latitude', 'Longitude',  # 'Bulk Density (g/cm3)', 'Organic Matter (%)'
 #                                          ], axis=1), thres=2, target='Shallow Subsidence Rate (mm/yr)')
 # transformations (basically log transforamtions) --> the log actually kinda regularizes too
@@ -250,15 +252,15 @@ for key in marshdic:
     # It is preshuffled so i do not think ordering will be a problem
     # t = np.log10(mdf[outcome].reset_index().drop('index', axis=1))
     t = mdf[outcome].reset_index().drop('index', axis=1)
-    phi = mdf.drop([outcome, 'Community', 'Latitude', 'Longitude', 'Organic Matter (%)', 'Bulk Density (g/cm3)',
-                    'Shallow Subsidence Rate (mm/yr)'],
+    phi = mdf.drop([outcome, 'Community', 'Latitude', 'Longitude',  'Organic Matter (%)', 'Bulk Density (g/cm3)',
+                    ],
                    axis=1).reset_index().drop('index', axis=1)
     # Scale: because I want feature importances
     scalar_Xmarsh = StandardScaler()
     predictors_scaled = pd.DataFrame(scalar_Xmarsh.fit_transform(phi), columns=phi.columns.values)
     # NOTE: I do feature selection using whole dataset because I want to know the imprtant features rather than making a generalizable model
-    br = linear_model.BayesianRidge(fit_intercept=True)
-
+    # br = linear_model.BayesianRidge(fit_intercept=True)
+    #
     # feature_selector = ExhaustiveFeatureSelector(br,
     #                                                  min_features=1,
     #                                                  max_features=len(phi.columns.values),
