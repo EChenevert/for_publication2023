@@ -438,7 +438,7 @@ shap_values = explainer(X)
 
 plt.figure()
 # Summary plot
-shap.summary_plot(shap_values, features=X, feature_names=X.columns, plot_size=[30, 5], show=False)
+shap.summary_plot(shap_values, features=X, feature_names=X.columns, plot_size=[10, 5], show=False)
 plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\shap_summaryplot.pdf", format="pdf", dpi=300, bbox_inches='tight')
 # Summary heat map
 plt.figure()

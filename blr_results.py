@@ -76,7 +76,8 @@ df.to_csv("D:\\Etienne\\fall2022\\agu_data\\results\\minimal_preprocessing.csv")
 
 # Now clean the columns
 # First delete columns that are more than 1/2 nans
-tdf = df.dropna(thresh=df.shape[0]*0.5, how='all', axis=1)
+# tdf = df.dropna(thresh=df.shape[0]*0.5, how='all', axis=1)
+tdf = df.dropna(thresh=df.shape[0]*0.3, how='all', axis=1)
 # Drop uninformative features
 udf = tdf.drop([
     'Year (yyyy)', 'Accretion Measurement 1 (mm)', 'Year',
@@ -345,6 +346,8 @@ for key in hold_marsh_weights:
 
 # Plot the distribution of weight parameters for the marsh runs
 for key in hold_unscaled_weights:
+    print("Unscaled Weights for " + str(key))
+    print(hold_unscaled_weights[key].mean())
     sns.set_theme(style='white', font_scale=1.4)
     fig, ax = plt.subplots(figsize=(11, 8))
     ax.set_ylabel("Rescaled Weight Coefficients")
@@ -356,7 +359,7 @@ for key in hold_unscaled_weights:
     palette_ls = []
     for weight in hold_unscaled_weights[key].keys():
         palette_ls.append(colormap[weight])
-    boxplot = sns.boxplot(data=hold_unscaled_weights[key], notch=True, showfliers=False, palette=palette_ls)
+    boxplot = sns.boxplot(data=hold_unscaled_weights[key], notch=True, showfliers=False, palette=palette_ls, width=0.4)
     funcs.wrap_labels(ax, 10)
     fig.subplots_adjust(bottom=0.3)
     fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\" + str(
