@@ -25,6 +25,7 @@ all_acc = np.asarray(df['Accretion Rate (mm/yr)'])
 bulk = np.asarray(df['Bulk Density (g/cm3)'])
 sally = np.asarray(df['Soil Porewater Salinity (ppt)'])
 ndvi = np.asarray(df['NDVI'])
+VEGE = np.asarray(df['Average Height Dominant (cm)'])
 
 fig1, ax1 = plt.subplots(figsize=(8, 6))
 scat = ax1.scatter(tides, all_acc, c=bulk, cmap="rocket_r", s=50*10**bulk)
@@ -62,6 +63,25 @@ ax2.set_xlabel('Soil Porewater Salinity (ppt)')
 plt.legend()
 plt.show()
 fig2.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_salinity_scatterplot.eps",
+            dpi=300, format="eps")
+
+## NDVI, Salinity, and Average height of the dominant
+fig2, ax2 = plt.subplots(figsize=(8, 6))
+scat = ax2.scatter(ndvi, sally, c=VEGE, cmap="rocket_r", s=VEGE**2)
+
+cbar = fig2.colorbar(scat, ticks=[np.min(VEGE), np.max(VEGE)])
+cbar.ax.set_yticklabels([round(np.min(VEGE), 2), round(np.max(VEGE), 2)])# vertically oriented colorbar
+cbar.ax.get_yaxis().labelpad = 10
+cbar.set_label('Average Height Dominant (cm)', rotation=270)
+
+m, b = np.polyfit(ndvi, sally, deg=1)
+xseq = np.linspace(0, np.max(ndvi), num=100)
+ax2.plot(xseq, xseq*m + b, "k--", lw=2.5, label="{m} Soil Porewater Salinity + {b}".format(b=round(b, 2), m=round(m, 2)))
+ax2.set_ylabel('NDVI')
+ax2.set_xlabel('Soil Porewater Salinity (ppt)')
+plt.legend()
+plt.show()
+fig2.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_salinity_VEGE_scatterplot.eps",
             dpi=300, format="eps")
 
 # Show that TSS comliments the interpretation that position in tidal frame is related to Suspended Sediment delivery

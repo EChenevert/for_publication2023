@@ -440,6 +440,12 @@ plt.figure()
 # Summary plot
 shap.summary_plot(shap_values, features=X, feature_names=X.columns, plot_size=[10, 5], show=False)
 plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\shap_summaryplot.pdf", format="pdf", dpi=300, bbox_inches='tight')
+
+# Bar plot for feature importance
+plt.figure()
+shap.summary_plot(shap_values, features=X, feature_names=X.columns, plot_size=[10, 5], show=False, plot_type="bar")
+plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\shap_barplot.pdf", format="pdf", dpi=300, bbox_inches='tight')
+
 # Summary heat map
 plt.figure()
 shap.plots.heatmap(shap_values, instance_order=shap_values.sum(1), show=False)
@@ -490,3 +496,48 @@ plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\TSS_partial.pdf", format="pdf
 shap.plots.scatter(shap_values[:, 'TSS (*)'], color=shap_values[:, 'Soil Porewater Salinity (*)'],
                    show=False)
 plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\TSS_partialSHAP.pdf", format="pdf", dpi=300, bbox_inches='tight')
+
+
+# SHAP Dependence Plots for the discussion regarding interactions between tidal amplitude, flood depth, and NDVI
+# Tidal + NDVI
+plt.figure()
+shap.plots.scatter(shap_values[:, 'Tidal Amplitude (*)'], color=shap_values[:, 'NDVI (*)'],
+                   show=False)
+plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\tidal_NDVI_partialSHAP.pdf", format="pdf", dpi=300,
+            bbox_inches='tight')
+# Flood Depth + NDVI
+plt.figure()
+shap.plots.scatter(shap_values[:, '90th Percentile Flood Depth (*)'], color=shap_values[:, 'NDVI (*)'],
+                   show=False)
+plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\flood_NDVI_partialSHAP.pdf", format="pdf", dpi=300,
+            bbox_inches='tight')
+# Tidal + Salinity
+plt.figure()
+shap.plots.scatter(shap_values[:, 'Tidal Amplitude (*)'], color=shap_values[:, 'Soil Porewater Salinity (*)'],
+                   show=False)
+plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\tidal_salinity_partialSHAP.pdf", format="pdf", dpi=300,
+            bbox_inches='tight')
+# Flood + Salinity
+plt.figure()
+shap.plots.scatter(shap_values[:, '90th Percentile Flood Depth (*)'], color=shap_values[:, 'Soil Porewater Salinity (*)'],
+                   show=False)
+plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\flood_salinity_partialSHAP.pdf", format="pdf", dpi=300,
+            bbox_inches='tight')
+# NDVI + Tide
+plt.figure()
+shap.plots.scatter(shap_values[:, 'NDVI (*)'], color=shap_values[:, 'Tidal Amplitude (*)'],
+                   show=False)
+plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\NDVI_tide_partialSHAP.pdf", format="pdf", dpi=300,
+            bbox_inches='tight')
+# NDVI + flood
+plt.figure()
+shap.plots.scatter(shap_values[:, 'NDVI (*)'], color=shap_values[:, '90th Percentile Flood Depth (*)'],
+                   show=False)
+plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\NDVI_flood_partialSHAP.pdf", format="pdf", dpi=300,
+            bbox_inches='tight')
+# I think these interactions make sense if we see the distribution of NDVI values across marsh types (?)
+# ---- This would say that saline marshes have the lowest NDVI, thus, these areas are the ones accreting the most...?
+# ---- But then we have to explain how...?
+# We can also go the route of investigating the NDVI signitures of ...
+
+
