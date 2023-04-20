@@ -54,6 +54,18 @@ jrc = pd.read_csv(r"D:\Etienne\summer2022_CRMS\run_experiments\CRMS_GEE_JRCCOPY2
 gee = pd.read_csv(r"D:\Etienne\fall2022\agu_data\CRMS_GEE60pfrom2007to2022.csv",
                           encoding="unicode escape")[['Simple_sit', 'NDVI', 'tss_med', 'windspeed']]\
     .groupby('Simple_sit').median().fillna(0)  # filling nans with zeros cuz all nans are in tss because some sites are not near water
+
+
+
+# ############# Attempting the SAVI switch #########################
+# gee = pd.read_csv(r"D:\Etienne\fall2022\agu_data\CRMS_GEE60perc_wSAVI.csv",
+#                           encoding="unicode escape")[['CRMS Site', 'SAVI', 'tss_med', 'Windspeed (m/s)']]\
+#     .groupby('CRMS Site').median().fillna(0)  # filling nans with zeros cuz all nans are in tss because some sites are not near water
+# ########################################################################
+
+
+
+
 distRiver = pd.read_csv(r"D:\Etienne\fall2022\CRMS_data\totalDataAndRivers.csv",
                         encoding="unicode escape")[['Field1', 'distance_to_river_m', 'width_mean']].groupby('Field1').median()
 nearWater = pd.read_csv(r"D:\Etienne\fall2022\agu_data\ALLDATA2.csv", encoding="unicode_escape")[

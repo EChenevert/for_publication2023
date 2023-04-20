@@ -53,6 +53,14 @@ jrc = pd.read_csv(r"D:\Etienne\summer2022_CRMS\run_experiments\CRMS_GEE_JRCCOPY2
 gee = pd.read_csv(r"D:\Etienne\fall2022\agu_data\CRMS_GEE60pfrom2007to2022.csv",
                           encoding="unicode escape")[['Simple_sit', 'NDVI', 'tss_med', 'windspeed']]\
     .groupby('Simple_sit').median().fillna(0)  # filling nans with zeros cuz all nans are in tss because some sites are not near water
+
+
+# ############# Attempting the SAVI switch #########################
+# gee = pd.read_csv(r"D:\Etienne\fall2022\agu_data\CRMS_GEE60perc_wSAVI.csv",
+#                           encoding="unicode escape")[['CRMS Site', 'SAVI', 'tss_med', 'Windspeed (m/s)']]\
+#     .groupby('CRMS Site').median().fillna(0)  # filling nans with zeros cuz all nans are in tss because some sites are not near water
+# ########################################################################
+
 distRiver = pd.read_csv(r"D:\Etienne\fall2022\CRMS_data\totalDataAndRivers.csv",
                         encoding="unicode escape")[['Field1', 'distance_to_river_m', 'width_mean']].groupby('Field1').median()
 nearWater = pd.read_csv(r"D:\Etienne\fall2022\agu_data\ALLDATA2.csv", encoding="unicode_escape")[
@@ -76,8 +84,8 @@ df.to_csv("D:\\Etienne\\fall2022\\agu_data\\results\\minimal_preprocessing.csv")
 
 # Now clean the columns
 # First delete columns that are more than 1/2 nans
-# tdf = df.dropna(thresh=df.shape[0]*0.5, how='all', axis=1)
-tdf = df.dropna(thresh=df.shape[0]*0.3, how='all', axis=1)
+tdf = df.dropna(thresh=df.shape[0]*0.5, how='all', axis=1)
+# tdf = df.dropna(thresh=df.shape[0]*0.3, how='all', axis=1)
 # Drop uninformative features
 udf = tdf.drop([
     'Year (yyyy)', 'Accretion Measurement 1 (mm)', 'Year',
@@ -310,7 +318,7 @@ colormap = {
 'Windspeed (m/s)': '#70ECE3',
 'Tidal Amplitude (cm)': '#434F93',
 'Avg. Flood Depth (cm)': '#087AFA',
-# 'Avg. Waterlevel to Marsh (ft)':  '#087AFD',
+'SAVI':  '#087AFD',
 # '90th Percentile of Waterlevel to Marsh (ft)': '#D001A1',
 '90th Percentile Flood Depth (cm)': '#D000E1',
 # '10th Percentile of Waterlevel to Marsh (ft)': '#73ABAE',
