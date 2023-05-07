@@ -64,7 +64,7 @@ gee = pd.read_csv(r"D:\Etienne\fall2022\agu_data\CRMS_GEE60pfrom2007to2022.csv",
 distRiver = pd.read_csv(r"D:\Etienne\fall2022\CRMS_data\totalDataAndRivers.csv",
                         encoding="unicode escape")[['Field1', 'distance_to_river_m', 'width_mean']].groupby('Field1').median()
 nearWater = pd.read_csv(r"D:\Etienne\fall2022\agu_data\ALLDATA2.csv", encoding="unicode_escape")[
-    ['Simple site', 'Distance_to_Water_m']  # 'Distance_to_Ocean_m'
+    ['Simple site', 'Distance_to_Water_m', 'Distance_to_Ocean_m']
 ].set_index('Simple site')
 # Add flooding frequency
 floodfreq = pd.read_csv(r"D:\Etienne\PAPER_2023\CRMS_Continuous_Hydrographic\floodingsplits\final_floodfreq.csv", encoding="unicode_escape")[[
@@ -81,6 +81,7 @@ df = pd.concat([bysite, distRiver, nearWater, gee, jrc, wl, perc, SEC, floodfreq
                axis=1, join='outer')
 
 df.to_csv("D:\\Etienne\\fall2022\\agu_data\\results\\minimal_preprocessing.csv")
+
 
 # Now clean the columns
 # First delete columns that are more than 1/2 nans
@@ -148,11 +149,11 @@ des = udf.describe()  # just to identify which variables are way of the scale
 udf['distance_to_river_km'] = udf['distance_to_river_m']/1000  # convert to km
 udf['river_width_mean_km'] = udf['width_mean']/1000
 udf['distance_to_water_km'] = udf['Distance_to_Water_m']/1000
-# udf['distance_to_ocean_km'] = udf['Distance_to_Ocean_m']/1000
+udf['distance_to_ocean_km'] = udf['Distance_to_Ocean_m']/1000
 udf['land_lost_km2'] = udf['Land_Lost_m2']*0.000001  # convert to km2
 
 # Drop remade variables
-udf = udf.drop(['distance_to_river_m', 'width_mean', 'Distance_to_Water_m', #  'Distance_to_Ocean_m',
+udf = udf.drop(['distance_to_river_m', 'width_mean', 'Distance_to_Water_m', 'Distance_to_Ocean_m',
                 'Soil Specific Conductance (uS/cm)',
                 'Soil Porewater Specific Conductance (uS/cm)',
                 'Land_Lost_m2'], axis=1)
@@ -232,7 +233,7 @@ gdf = gdf.drop(['Std. Deviation Flood Depth (ft)', 'Avg. Flood Depth (ft)', '10t
 
 # Export gdf to file specifically for AGU data and results
 gdf.to_csv("D:\\Etienne\\fall2022\\agu_data\\results\\AGU_dataset.csv")
-
+gdf = gdf.drop('distance_to_ocean_km', axis=1)
 # split into marsh datasets
 
 brackdf = gdf[gdf['Community'] == 'Brackish']
