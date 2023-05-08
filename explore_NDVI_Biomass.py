@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import funcs
 
 fall2021 = pd.read_csv(r"D:\Etienne\PAPER_2023\explore_NDVI_biomass\DeltaX_Aboveground_Biomass_Necromass_Fall2021.csv",
                        encoding="unicode_escape")
@@ -63,5 +64,93 @@ sns.boxplot(data=fall2021[fall2021['site_id'] == 'CRMS0421'],
 plt.title('CRMS0421')
 plt.show()
 print("Total Mass:", fall2021[fall2021['site_id'] == 'CRMS0421']['total_dry_mass'].sum())
+
+
+
+# NEXT: Use the CRMS aboveground biomass dataset instead, ( easier to work with and more data etc )
+# Then do an analysis to correlate teh NDVI to aboveground biomass of specific species...
+agb = pd.read_csv(r"D:\Etienne\PAPER_2023\explore_NDVI_biomass\CRMS_Biomass\CRMS_Biomass.csv",
+                  encoding="unicode_escape")
+fig, ax = plt.subplots(figsize=(20, 8))
+sns.boxplot(data=agb, x='Common Name as Currently Recognized',
+            y='Total Plot Aboveground Live Biomass (g/m2)', showfliers=False)
+funcs.wrap_labels(ax, 5)
+plt.show()
+
+fig, ax = plt.subplots(figsize=(20, 8))
+sns.boxplot(data=agb, x='Common Name as Currently Recognized',
+            y='Total Plot Aboveground Dead Biomass (g/m2)', showfliers=False)
+funcs.wrap_labels(ax, 5)
+plt.show()
+
+fig, ax = plt.subplots(figsize=(20, 8))
+sns.boxplot(data=agb, x='Common Name as Currently Recognized',
+            y='Aboveground Live Biomass (g/m2)', showfliers=False)
+funcs.wrap_labels(ax, 5)
+plt.show()
+
+fig, ax = plt.subplots(figsize=(20, 8))
+sns.boxplot(data=agb, x='Common Name as Currently Recognized',
+            y='Live stems (N)', showfliers=False)
+funcs.wrap_labels(ax, 5)
+plt.show()
+
+fig, ax = plt.subplots(figsize=(20, 8))
+sns.boxplot(data=agb, x='Common Name as Currently Recognized',
+            y='Average Live Stem Diameter (mm)', showfliers=False)
+funcs.wrap_labels(ax, 5)
+plt.show()
+
+## Combine the agb dataset with accretion to see how it relates
+agb['Simple site'] = [i[:8] for i in agb['Station ID']]
+agb_gb = agb.groupby("Simple site").agg({'Aboveground Live Biomass (g/m2)': 'mean',
+                                         'Common Name as Currently Recognized': lambda x: x.mode()})
+agb_gb = agb_gb.dropna()
+agb_gb['Common Name as Currently Recognized'] = [x[0] if type(x) != str else x for x in
+                                                 agb_gb['Common Name as Currently Recognized']]
+new = pd.concat([agb_gb, df.set_index("Unnamed: 0")], axis=1)
+
+
+# With new lets do some exploring
+fig, ax = plt.subplots(figsize=(10, 10))
+sns.scatterplot(data=new, x='NDVI', y='Accretion Rate (mm/yr)', hue='Common Name as Currently Recognized')
+plt.show()
+
+# fig, ax = plt.subplots(figsize=(20, 8))
+sns.scatterplot(data=new, x='NDVI', y='Aboveground Live Biomass (g/m2)', hue='Accretion Rate (mm/yr)')
+plt.show()
+
+fig, ax = plt.subplots(figsize=(8, 8))
+sns.scatterplot(data=new, x='NDVI', y='Aboveground Live Biomass (g/m2)', hue='Common Name as Currently Recognized')
+plt.show()
+
+
+fig, ax = plt.subplots(figsize=(8, 8))
+sns.scatterplot(data=new, x='NDVI', y='Aboveground Live Biomass (g/m2)', hue='Community')
+plt.show()
+
+# fig, ax = plt.subplots(figsize=(8, 8))
+plt.title("Saline Marsh: NDVI vs Above ground Biomass")
+sns.scatterplot(data=new[new['Community'] == 'Saline'], x='NDVI', y='Aboveground Live Biomass (g/m2)',
+                hue='Common Name as Currently Recognized')
+plt.show()
+
+fig, ax = plt.subplots(figsize=(8, 8))
+sns.scatterplot(data=new[new['Community'] == 'Brackish'], x='NDVI', y='Aboveground Live Biomass (g/m2)',
+                hue='Common Name as Currently Recognized')
+plt.show()
+
+fig, ax = plt.subplots(figsize=(8, 8))
+sns.scatterplot(data=new[new['Community'] == 'Intermediate'], x='NDVI', y='Aboveground Live Biomass (g/m2)',
+                hue='Common Name as Currently Recognized')
+plt.show()
+
+fig, ax = plt.subplots(figsize=(8, 8))
+sns.scatterplot(data=new[new['Community'] == 'Freshwater'], x='NDVI', y='Aboveground Live Biomass (g/m2)',
+                hue='Common Name as Currently Recognized')
+plt.show()
+
+
+
 
 

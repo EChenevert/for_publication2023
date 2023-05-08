@@ -85,8 +85,8 @@ df.to_csv("D:\\Etienne\\fall2022\\agu_data\\results\\minimal_preprocessing.csv")
 
 # Now clean the columns
 # First delete columns that are more than 1/2 nans
-tdf = df.dropna(thresh=df.shape[0]*0.5, how='all', axis=1)
-# tdf = df.dropna(thresh=df.shape[0]*0.3, how='all', axis=1)
+# tdf = df.dropna(thresh=df.shape[0]*0.5, how='all', axis=1)
+tdf = df.dropna(thresh=df.shape[0]*0.3, how='all', axis=1)  # this threshold lets sand, silt, clay terms stay
 # Drop uninformative features
 udf = tdf.drop([
     'Year (yyyy)', 'Accretion Measurement 1 (mm)', 'Year',
