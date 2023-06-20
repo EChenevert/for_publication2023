@@ -1,7 +1,8 @@
 from mlxtend.feature_selection import ExhaustiveFeatureSelector
 from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import DotProduct, WhiteKernel
+from sklearn.gaussian_process.kernels import DotProduct, WhiteKernel, RBF
 import matplotlib.pyplot as plt
+
 from sklearn.metrics import r2_score, mean_absolute_error
 from random import seed
 
@@ -310,10 +311,10 @@ predictors_scaled = pd.DataFrame(scalar.fit_transform(predictors), columns=predi
 #                 '10th Percentile Flood Depth (cm)', 'Avg. Time Flooded (%)', 'Soil Porewater Salinity (ppt)']
 # bestfeatures = ['Tidal Amplitude (cm)', 'TSS (mg/l)', 'Avg. Flood Depth (cm)', '90th Percentile Flood Depth (cm)',
 #                 'Soil Porewater Salinity (ppt)']
-# bestfeatures = ['Tidal Amplitude (cm)', 'TSS (mg/l)', 'Avg. Flood Depth (cm)', '90th Percentile Flood Depth (cm)',
-#                 'Soil Porewater Salinity (ppt)', 'NDVI']
-bestfeatures = ['Tidal Amplitude (cm)', 'TSS (mg/l)', '90th Percentile Flood Depth (cm)',
+bestfeatures = ['Tidal Amplitude (cm)', 'TSS (mg/l)', 'Avg. Flood Depth (cm)',
                 'Soil Porewater Salinity (ppt)', 'NDVI']
+# bestfeatures = ['Tidal Amplitude (cm)', 'TSS (mg/l)', '90th Percentile Flood Depth (cm)',
+#                 'Soil Porewater Salinity (ppt)', 'NDVI']
 # # bestfeatures = ['Tidal Amplitude (cm)', 'TSS (mg/l)', 'Avg. Flood Depth (cm)', 'Std. Deviation Flood Depth (cm)',
 # #                 'Soil Porewater Salinity (ppt)', 'NDVI']
 X = predictors_scaled[bestfeatures]
@@ -369,6 +370,7 @@ for i in range(100):  # for 100 repeats
         y_train, y_test = target.iloc[train_index], target.iloc[test_index]
         # Fit the model
         kernel = (DotProduct() ** 2) + WhiteKernel()
+        # kernel = DotProduct() + RBF()
         gpr = GaussianProcessRegressor(kernel=kernel, n_restarts_optimizer=10, random_state=0, alpha=0.5)
 
         gpr.fit(np.asarray(X_train), np.asarray(y_train))
@@ -437,7 +439,7 @@ import shap
 # Rename X to "Standardized Variables" this way it is clear that the variable distributions are standardized
 X = X.rename(columns={'Tidal Amplitude (cm)': 'Tidal Amplitude (*)',
                       'NDVI': 'NDVI (*)',
-                      '90th Percentile Flood Depth (cm)': '90th Percentile Flood Depth (*)',
+                      'Avg. Flood Depth (cm)': 'Avg. Flood Depth (*)',
                       'TSS (mg/l)': 'TSS (*)',
                       'Soil Porewater Salinity (ppt)': 'Soil Porewater Salinity (*)'})
 # Sampling and shap computation for explanation
@@ -468,17 +470,17 @@ plt.figure()
 shap.partial_dependence_plot('Tidal Amplitude (*)', gpr.predict, X500, ice=False, model_expected_value=True,
                              feature_expected_value=True, show=False)
 plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\tidalAmplitude_partial.pdf", format="pdf", dpi=300, bbox_inches='tight')
-shap.plots.scatter(shap_values[:, 'Tidal Amplitude (*)'], color=shap_values[:, '90th Percentile Flood Depth (*)'],
+shap.plots.scatter(shap_values[:, 'Tidal Amplitude (*)'], color=shap_values[:, 'Avg. Flood Depth (*)'],
                    show=False)
 plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\tidalAmplitude_partialSHAP.pdf", format="pdf", dpi=300, bbox_inches='tight')
 
 
 # Partial and SHAP dependence for 90th flood depth
 plt.figure()
-shap.partial_dependence_plot('90th Percentile Flood Depth (*)', gpr.predict, X500, ice=False, model_expected_value=True,
+shap.partial_dependence_plot('Avg. Flood Depth (*)', gpr.predict, X500, ice=False, model_expected_value=True,
                              feature_expected_value=True, show=False)
 plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\90flooddepth_partial.pdf", format="pdf", dpi=300, bbox_inches='tight')
-shap.plots.scatter(shap_values[:, '90th Percentile Flood Depth (*)'], color=shap_values[:, 'Tidal Amplitude (*)'],
+shap.plots.scatter(shap_values[:, 'Avg. Flood Depth (*)'], color=shap_values[:, 'Tidal Amplitude (*)'],
                    show=False)
 plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\90flodddepth_partialSHAP.pdf", format="pdf", dpi=300, bbox_inches='tight')
 
@@ -519,7 +521,7 @@ plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\tidal_NDVI_partialSHAP.pdf", 
             bbox_inches='tight')
 # Flood Depth + NDVI
 plt.figure()
-shap.plots.scatter(shap_values[:, '90th Percentile Flood Depth (*)'], color=shap_values[:, 'NDVI (*)'],
+shap.plots.scatter(shap_values[:, 'Avg. Flood Depth (*)'], color=shap_values[:, 'NDVI (*)'],
                    show=False)
 plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\flood_NDVI_partialSHAP.pdf", format="pdf", dpi=300,
             bbox_inches='tight')
@@ -531,7 +533,7 @@ plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\tidal_salinity_partialSHAP.pd
             bbox_inches='tight')
 # Flood + Salinity
 plt.figure()
-shap.plots.scatter(shap_values[:, '90th Percentile Flood Depth (*)'], color=shap_values[:, 'Soil Porewater Salinity (*)'],
+shap.plots.scatter(shap_values[:, 'Avg. Flood Depth (*)'], color=shap_values[:, 'Soil Porewater Salinity (*)'],
                    show=False)
 plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\flood_salinity_partialSHAP.pdf", format="pdf", dpi=300,
             bbox_inches='tight')
@@ -543,7 +545,7 @@ plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\NDVI_tide_partialSHAP.pdf", f
             bbox_inches='tight')
 # NDVI + flood
 plt.figure()
-shap.plots.scatter(shap_values[:, 'NDVI (*)'], color=shap_values[:, '90th Percentile Flood Depth (*)'],
+shap.plots.scatter(shap_values[:, 'NDVI (*)'], color=shap_values[:, 'Avg. Flood Depth (*)'],
                    show=False)
 plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\NDVI_flood_partialSHAP.pdf", format="pdf", dpi=300,
             bbox_inches='tight')
@@ -552,4 +554,39 @@ plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\NDVI_flood_partialSHAP.pdf", 
 # ---- But then we have to explain how...?
 # We can also go the route of investigating the NDVI signitures of ...
 
+# Provide example waterfall plot of some of the percentiles of the tidal ampltiude variable
+def get_percentile(percentile_decimal, array):
+    idx = round(percentile_decimal * (len(array) - 1))
+    val = np.sort(array)[idx]
+    real_idx = np.where(array == val)
+    return real_idx[0]
 
+
+# When the tidal amplitude has a high influence => 90th, 75th, 50th, 25th, 10th
+tide90 = get_percentile(0.9, shap_values.data[:, 0])[0]
+tide75 = get_percentile(0.75, shap_values.data[:, 0])[0]
+tide50 = get_percentile(0.5, shap_values.data[:, 0])[0]
+tide25 = get_percentile(0.25, shap_values.data[:, 0])[0]
+tide10 = get_percentile(0.1, shap_values.data[:, 0])[0]
+
+# plt.figure(figsize=(10, 15))
+plt.figure()
+shap.plots.waterfall(shap_values[tide90], show=False)
+plt.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\90thTidalAmp_waterfall.pdf", format="pdf", dpi=300,
+            bbox_inches='tight')
+
+# plt.figure(figsize=(10, 15))
+# shap.plots.waterfall(shap_values[tide75])
+# plt.show()
+#
+# plt.figure(figsize=(10, 15))
+# shap.plots.waterfall(shap_values[tide50])
+# plt.show()
+#
+# plt.figure(figsize=(10, 15))
+# shap.plots.waterfall(shap_values[tide25])
+# plt.show()
+#
+# plt.figure(figsize=(10, 15))
+# shap.plots.waterfall(shap_values[tide10])
+# plt.show()

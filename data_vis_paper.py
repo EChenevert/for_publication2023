@@ -1,7 +1,9 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy
 import seaborn as sns
+from sklearn.metrics import r2_score
 
 df = pd.read_csv(r"D:\\Etienne\\fall2022\\agu_data\\results\\AGU_dataset.csv", encoding='unicode_escape')
 
@@ -21,11 +23,67 @@ df = pd.read_csv(r"D:\\Etienne\\fall2022\\agu_data\\results\\AGU_dataset.csv", e
 plt.rcParams.update({'font.size': 16})
 
 tides = np.asarray(df['Tidal Amplitude (cm)'])
+flood90 = np.asarray(df['90th Percentile Flood Depth (cm)'])
+avgFlood = np.asarray(df['Avg. Flood Depth (cm)'])
 all_acc = np.asarray(df['Accretion Rate (mm/yr)'])
 bulk = np.asarray(df['Bulk Density (g/cm3)'])
 sally = np.asarray(df['Soil Porewater Salinity (ppt)'])
 ndvi = np.asarray(df['NDVI'])
 VEGE = np.asarray(df['Average Height Dominant (cm)'])
+
+
+#### Some Plots and relationships for making distinguishing points in paper #####
+# Check
+slope1, intercept1, pearsons_r_value1, p_value1, std_err1 = scipy.stats.linregress(flood90, avgFlood)
+
+#####
+fig4, ax4 = plt.subplots(figsize=(8, 6))
+scat4 = ax4.scatter(flood90, avgFlood)
+
+m, b = np.polyfit(flood90, avgFlood, deg=1)
+xseq = np.linspace(0, np.max(flood90), num=100)
+ax4.plot(xseq, xseq*m + b, "k--", lw=2.5, label="{m}90th Percentile Flood Depth + {b}".format(b=round(b, 2), m=round(m, 2)))
+
+# r-squared
+predicted1 = flood90*m + b
+score1 = r2_score(avgFlood, predicted1)
+print(score1)
+
+ax4.set_ylabel('Avg. Flood Depth (cm)')
+ax4.set_xlabel('90th Percentile Flood Depth (cm)')
+# plt.legend()
+plt.show()
+fig4.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\avgFlood_90flood_scatterplot.eps",
+             dpi=300, format="eps")
+
+
+#### Some Plots and relationships for making distinguishing points in paper #####
+# Check
+slope, intercept, pearsons_r_value, p_value, std_err = scipy.stats.linregress(flood90, tides)
+
+#####
+fig3, ax3 = plt.subplots(figsize=(8, 6))
+scat3 = ax3.scatter(flood90, tides)
+
+m, b = np.polyfit(flood90, tides, deg=1)
+xseq = np.linspace(0, np.max(flood90), num=100)
+ax3.plot(xseq, xseq*m + b, "k--", lw=2.5, label="{m}90th Percentile Flood Depth + {b}".format(b=round(b, 2), m=round(m, 2)))
+
+# r-squared
+from sklearn.metrics import r2_score
+
+predicted = flood90*m + b
+score = r2_score(tides, predicted)
+print(score)
+
+ax3.set_ylabel('Tidal Amplitude (cm)')
+ax3.set_xlabel('90th Percentile Flood Depth (cm)')
+# plt.legend()
+plt.show()
+fig3.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\tide_90flood_scatterplot.eps",
+             dpi=300, format="eps")
+######################################################################################
+
 
 fig1, ax1 = plt.subplots(figsize=(8, 6))
 scat = ax1.scatter(tides, all_acc, c=bulk, cmap="rocket_r", s=50*10**bulk)
@@ -249,6 +307,5 @@ f.subplots_adjust(bottom=0.2)
 plt.show()
 f.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\allmarshes_ndvi_histogram.eps",
           dpi=300, format="eps")
-
 
 

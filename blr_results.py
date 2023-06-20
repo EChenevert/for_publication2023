@@ -85,8 +85,8 @@ df.to_csv("D:\\Etienne\\fall2022\\agu_data\\results\\minimal_preprocessing.csv")
 
 # Now clean the columns
 # First delete columns that are more than 1/2 nans
-# tdf = df.dropna(thresh=df.shape[0]*0.5, how='all', axis=1)
-tdf = df.dropna(thresh=df.shape[0]*0.3, how='all', axis=1)  # this threshold lets sand, silt, clay terms stay
+tdf = df.dropna(thresh=df.shape[0]*0.5, how='all', axis=1)
+# tdf = df.dropna(thresh=df.shape[0]*0.3, how='all', axis=1)  # this threshold lets sand, silt, clay terms stay
 # Drop uninformative features
 udf = tdf.drop([
     'Year (yyyy)', 'Accretion Measurement 1 (mm)', 'Year',
@@ -174,7 +174,8 @@ udf = udf.drop([  # IM BEING RISKY AND KEEP SHALLOW SUBSIDENCE RATE
 
     # Delete the dominant herb cuz of rendundancy with dominant veg
     'Average Height Herb (cm)',
-
+    # Test delete
+    # '10th Percentile Flood Depth when Flooded (ft)', '90th Percentile Flood Depth when Flooded (ft)',
     # other weird ones
     'Soil Porewater Temperature (°C)',
     'Average_Marsh_Elevation (ft. NAVD88)',
@@ -228,6 +229,7 @@ gdf['Avg. Flood Depth (cm)'] = gdf['Avg. Flood Depth (ft)'] * 30.48
 gdf['Std. Deviation Flood Depth (cm)'] = gdf['Std. Deviation Flood Depth (ft)'] * 30.48
 
 # Delete the old non SI unit variables
+# gdf = gdf.drop(['Std. Deviation Flood Depth (ft)', 'Avg. Flood Depth (ft)', 'Tide Amp (ft)'], axis=1)
 gdf = gdf.drop(['Std. Deviation Flood Depth (ft)', 'Avg. Flood Depth (ft)', '10th Percentile Flood Depth (ft)',
                 '90th Percentile Flood Depth (ft)', 'Tide Amp (ft)'], axis=1)
 
