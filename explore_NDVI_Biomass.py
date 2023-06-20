@@ -187,7 +187,7 @@ fig2.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_flooddepth_tides_scatterpl
 # State that this is not related to different flood inundation times because the highest inundations are on the
 # shallower NDVI slope
 fig3, ax3 = plt.subplots(figsize=(8, 6))
-sns.scatterplot(data=new, x='90th Percentile Flood Depth (cm)', y='NDVI', hue='Avg. Time Flooded (%)',
+sns.scatterplot(data=df, x='90th Percentile Flood Depth (cm)', y='NDVI', hue='Avg. Time Flooded (%)',
                 size='Avg. Time Flooded (%)')
 plt.show()
 fig3.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_flooddepth_floodtime_scatterplot.eps",
@@ -197,7 +197,7 @@ fig3.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_flooddepth_floodtime_scatt
 # relationship
 palette = {'Brackish': '#ADD8E6', 'Saline': '#032180', 'Intermediate': '#5DC069', 'Freshwater': '#006E0D'}
 fig4, ax4 = plt.subplots(figsize=(8, 6))
-sns.scatterplot(data=new, x='90th Percentile Flood Depth (cm)', y='NDVI', hue='Community',
+sns.scatterplot(data=df, x='90th Percentile Flood Depth (cm)', y='NDVI', hue='Community',
                 palette=palette)
 plt.show()
 fig4.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_flooddepth_community_scatterplot.eps",

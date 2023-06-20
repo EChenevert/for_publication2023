@@ -198,11 +198,11 @@ rdf = funcs.max_interquartile_outlierrm(udf.drop(['Community', 'Latitude', 'Long
 rdf['log_distance_to_water_km'] = [np.log(val) if val > 0 else 0 for val in rdf['distance_to_water_km']]
 # rdf['log_river_width_mean_km'] = [np.log(val) if val > 0 else 0 for val in rdf['river_width_mean_km']]
 rdf['log_distance_to_river_km'] = [np.log(val) if val > 0 else 0 for val in rdf['distance_to_river_km']]
-# rdf['log_distance_to_ocean_km'] = [np.log10(val) if val > 0 else 0 for val in rdf['distance_to_ocean_km']]
+rdf['log_distance_to_ocean_km'] = [np.log10(val) if val > 0 else 0 for val in rdf['distance_to_ocean_km']]
 # rdf['Average Height Dominant (mm)'] = rdf['Average Height Dominant (cm)'] * 10
 # rdf['Average Height Herb (mm)'] = rdf['Average Height Herb (cm)'] * 10
 # drop the old features
-rdf = rdf.drop(['distance_to_water_km', 'distance_to_river_km'], axis=1)  # 'distance_to_ocean_km'
+rdf = rdf.drop(['distance_to_water_km', 'distance_to_river_km', 'distance_to_ocean_km'], axis=1)  # 'distance_to_ocean_km'
 
 # Rename some variables for better text wrapping
 rdf = rdf.rename(columns={
@@ -210,6 +210,7 @@ rdf = rdf.rename(columns={
     'avg_percentflooded (%)': 'Avg. Time Flooded (%)',
     'windspeed': 'Windspeed (m/s)',
 
+    'log_distance_to_ocean_km': 'Log Distance to Ocean (km)',
     'log_distance_to_water_km': 'Log Distance to Water (km)',
     'log_distance_to_river_km': 'Log Distance to River (km)',
     # My flood depth vars
@@ -235,7 +236,7 @@ gdf = gdf.drop(['Std. Deviation Flood Depth (ft)', 'Avg. Flood Depth (ft)', '10t
 
 # Export gdf to file specifically for AGU data and results
 gdf.to_csv("D:\\Etienne\\fall2022\\agu_data\\results\\AGU_dataset.csv")
-gdf = gdf.drop('distance_to_ocean_km', axis=1)
+# gdf = gdf.drop('distance_to_ocean_km', axis=1)  # why?
 # split into marsh datasets
 
 brackdf = gdf[gdf['Community'] == 'Brackish']
