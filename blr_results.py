@@ -272,25 +272,25 @@ for key in marshdic:
     scalar_Xmarsh = StandardScaler()
     predictors_scaled = pd.DataFrame(scalar_Xmarsh.fit_transform(phi), columns=phi.columns.values)
     # NOTE: I do feature selection using whole dataset because I want to know the imprtant features rather than making a generalizable model
-    # br = linear_model.BayesianRidge(fit_intercept=True)
-    #
-    # feature_selector = ExhaustiveFeatureSelector(br,
-    #                                                  min_features=1,
-    #                                                  max_features=len(phi.columns.values),
-    #                                                  # I should only use 5 features (15 takes waaaaay too long)
-    #                                                  scoring='neg_mean_absolute_error',
-    #                                                  # print_progress=True,
-    #                                                  cv=3)  # 3 fold cross-validation
-    #
-    # efsmlr = feature_selector.fit(predictors_scaled, t.values.ravel())
-    #
-    # print('Best CV r2 score: %.2f' % efsmlr.best_score_)
-    # print('Best subset (indices):', efsmlr.best_idx_)
-    # print('Best subset (corresponding names):', efsmlr.best_feature_names_)
-    #
-    # bestfeaturesM = list(efsmlr.best_feature_names_)
+    br = linear_model.BayesianRidge(fit_intercept=True)
 
-    bestfeaturesM = funcs.backward_elimination(predictors_scaled, t, num_feats=20, significance_level=0.05)
+    feature_selector = ExhaustiveFeatureSelector(br,
+                                                     min_features=1,
+                                                     max_features=len(phi.columns.values),
+                                                     # I should only use 5 features (15 takes waaaaay too long)
+                                                     scoring='neg_mean_absolute_error',
+                                                     # print_progress=True,
+                                                     cv=3)  # 3 fold cross-validation
+
+    efsmlr = feature_selector.fit(predictors_scaled, t.values.ravel())
+
+    print('Best CV r2 score: %.2f' % efsmlr.best_score_)
+    print('Best subset (indices):', efsmlr.best_idx_)
+    print('Best subset (corresponding names):', efsmlr.best_feature_names_)
+
+    bestfeaturesM = list(efsmlr.best_feature_names_)
+
+    # bestfeaturesM = funcs.backward_elimination(predictors_scaled, t, num_feats=20, significance_level=0.05)
 
     # bestfeaturesM = funcs.backward_elimination(predictors_scaled, t.values.ravel(), num_feats=100,
     #                                            significance_level=0.01)
@@ -333,6 +333,7 @@ colormap = {
 'Flood Freq (Floods/yr)': '#EB0000',
 'Log Distance to Water (km)': '#442929',
 'Log Distance to River (km)': '#045F38',
+'Log Distance to Ocean (km)': '#045F27'
 }
 
 for key in hold_marsh_weights:

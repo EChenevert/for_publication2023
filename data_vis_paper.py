@@ -268,9 +268,11 @@ sns.histplot(ax=ax, stat="count", multiple="stack", bins=30,
              x=df['Tidal Amplitude (cm)'], kde=False,
              hue=df["Community"], palette=['#ADD8E6', '#032180', '#5DC069', '#006E0D'],
              element="bars", legend=True)
-ax.set_title("Distribution of Tidal Amplitude (cm)")
-ax.set_xlabel('Tidal Amplitude (cm)')
-ax.set_ylabel("Count")
+ax.set_title("Distribution of Tidal Amplitude (cm)", fontsize=24)
+ax.set_xlabel('Tidal Amplitude (cm)', fontsize=21)
+ax.set_ylabel("Count", fontsize=21)
+
+f.legend(fontsize=21)
 f.subplots_adjust(bottom=0.2)
 plt.show()
 f.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\allmarshes_tides_histogram.eps",
@@ -284,9 +286,11 @@ sns.histplot(ax=ax, stat="count", multiple="stack", bins=30,
              x=df['Soil Porewater Salinity (ppt)'], kde=False,
              hue=df["Community"], palette=['#ADD8E6', '#032180', '#5DC069', '#006E0D'],
              element="bars", legend=True)
-ax.set_title("Distribution of Soil Porewater Salinity (ppt)")
-ax.set_xlabel('Soil Porewater Salinity (ppt)')
-ax.set_ylabel("Count")
+ax.set_title("Distribution of Soil Porewater Salinity (ppt)", fontsize=24)
+ax.set_xlabel('Soil Porewater Salinity (ppt)', fontsize=21)
+ax.set_ylabel("Count", fontsize=21)
+
+f.legend(fontsize=21)
 f.subplots_adjust(bottom=0.2)
 plt.show()
 f.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\allmarshes_salinity_histogram.eps",
@@ -300,9 +304,11 @@ sns.histplot(ax=ax, stat="count", multiple="stack", bins=30,
              x=df['NDVI'], kde=False,
              hue=df["Community"], palette=['#ADD8E6', '#032180', '#5DC069', '#006E0D'],
              element="bars", legend=True)
-ax.set_title("Distribution of NDVI")
-ax.set_xlabel("NDVI")
-ax.set_ylabel("Count")
+ax.set_title("Distribution of NDVI", fontsize=24)
+ax.set_xlabel("NDVI", fontsize=21)
+ax.set_ylabel("Count", fontsize=21)
+
+f.legend(fontsize=21)
 f.subplots_adjust(bottom=0.2)
 plt.show()
 f.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\allmarshes_ndvi_histogram.eps",
