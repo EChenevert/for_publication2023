@@ -161,16 +161,22 @@ new = pd.concat([agb_gb, df.set_index("Unnamed: 0")], axis=1)
 
 # 1. There is no relationship between NDVI and Organic Matter in the soil
 fig, ax = plt.subplots(figsize=(8, 6))
-sns.scatterplot(data=new, y='NDVI', hue='Aboveground Live Biomass (g/m2)', x='Organic Matter (%)',
+sns.scatterplot(ax=ax, data=new, y='NDVI', hue='Aboveground Live Biomass (g/m2)', x='Organic Matter (%)',
                 size='Aboveground Live Biomass (g/m2)')
+ax.set_xlabel('Organic Matter (%)')
+ax.set_ylabel("NDVI", fontsize=21)
+plt.legend(fontsize=14, title='Aboveground Live Biomass (g/m2)', title_fontsize=18)
 plt.show()
 fig.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_org_scatterplot.eps",
             dpi=300, format="eps")
 
 # 2. Aboveground biomass seems to have a slight negative trend with NDVI for some reason
 fig1, ax1 = plt.subplots(figsize=(8, 6))
-sns.scatterplot(data=new, y='NDVI', x='Aboveground Live Biomass (g/m2)', hue='Organic Matter (%)',
+sns.scatterplot(ax=ax1, data=new, y='NDVI', x='Aboveground Live Biomass (g/m2)', hue='Organic Matter (%)',
                 size='Organic Matter (%)')
+ax1.set_xlabel('Aboveground Live Biomass (g/m2)', fontsize=21)
+ax1.set_ylabel("NDVI", fontsize=21)
+plt.legend(fontsize=14, title='Organic Matter (%)', title_fontsize=18)
 plt.show()
 fig1.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_biomass_scatterplot.eps",
             dpi=300, format="eps")
@@ -180,6 +186,9 @@ fig1.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_biomass_scatterplot.eps",
 fig2, ax2 = plt.subplots(figsize=(8, 6))
 sns.scatterplot(data=new, x='90th Percentile Flood Depth (cm)', y='NDVI', hue='Tidal Amplitude (cm)',
                 size='Tidal Amplitude (cm)')
+ax2.set_xlabel("90th Percentile Flood Depth (cm)", fontsize=21)
+ax2.set_ylabel("NDVI", fontsize=21)
+plt.legend(fontsize=14, title='Tidal Amplitude (cm)', title_fontsize=18)
 plt.show()
 fig2.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_flooddepth_tides_scatterplot.eps",
             dpi=300, format="eps")
@@ -189,6 +198,9 @@ fig2.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_flooddepth_tides_scatterpl
 fig3, ax3 = plt.subplots(figsize=(8, 6))
 sns.scatterplot(data=df, x='90th Percentile Flood Depth (cm)', y='NDVI', hue='Avg. Time Flooded (%)',
                 size='Avg. Time Flooded (%)')
+ax3.set_xlabel("90th Percentile Flood Depth (cm)", fontsize=21)
+ax3.set_ylabel("NDVI", fontsize=21)
+plt.legend(fontsize=14, title='Avg. Time Flooded (%)', title_fontsize=18)
 plt.show()
 fig3.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_flooddepth_floodtime_scatterplot.eps",
             dpi=300, format="eps")
@@ -199,6 +211,9 @@ palette = {'Brackish': '#ADD8E6', 'Saline': '#032180', 'Intermediate': '#5DC069'
 fig4, ax4 = plt.subplots(figsize=(8, 6))
 sns.scatterplot(data=df, x='90th Percentile Flood Depth (cm)', y='NDVI', hue='Community',
                 palette=palette)
+ax4.set_xlabel("90th Percentile Flood Depth (cm)", fontsize=21)
+ax4.set_ylabel("NDVI", fontsize=21)
+plt.legend(fontsize=14, title='Community', title_fontsize=18)
 plt.show()
 fig4.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_flooddepth_community_scatterplot.eps",
             dpi=300, format="eps")
@@ -207,6 +222,9 @@ fig4.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_flooddepth_community_scatt
 fig5, ax5 = plt.subplots(figsize=(8, 6))
 sns.scatterplot(data=new, x='90th Percentile Flood Depth (cm)', y='NDVI', hue='Accretion Rate (mm/yr)',
                 size='Accretion Rate (mm/yr)')
+ax5.set_xlabel("90th Percentile Flood Depth (cm)", fontsize=21)
+ax5.set_ylabel("NDVI", fontsize=21)
+plt.legend(fontsize=14, title='Accretion Rate (mm/yr)', title_fontsize=18)
 plt.show()
 fig5.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_flooddepth_accretion_scatterplot.eps",
             dpi=300, format="eps")
