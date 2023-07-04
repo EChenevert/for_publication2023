@@ -115,10 +115,68 @@ ax.set_xlabel('Tidal Amplitude (cm)', fontsize=21)
 ax.set_ylabel('Accretion Rate (mm/yr)', fontsize=21)
 ax.tick_params(axis='both', which='major', labelsize=18)
 
-plt.legend(fontsize=14, title='Accretion Rate (mm/yr)', title_fontsize=18)
+plt.legend(fontsize=14, title='90th Percentile Flood Depth (cm)', title_fontsize=18)
 plt.show()
 fig.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\scatter_tidal_flood_accretion.eps",
             dpi=300, format="eps")
 
+
 # NDVI plot
+fig, ax = plt.subplots(figsize=(8, 6))
+sns.scatterplot(data=df, x='NDVI', y='Accretion Rate (mm/yr)',
+                hue='Soil Porewater Salinity (ppt)',
+                size='Soil Porewater Salinity (ppt)')
+ax.set_xlabel('NDVI', fontsize=21)
+ax.set_ylabel('Accretion Rate (mm/yr)', fontsize=21)
+ax.tick_params(axis='both', which='major', labelsize=18)
+
+plt.legend(fontsize=14, title='Soil Porewater Salinity (ppt)', title_fontsize=18)
+plt.show()
+fig.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\scatter_ndvi_salinity_accretion.eps",
+            dpi=300, format="eps")
+
+
+# Salinity plot
+fig, ax = plt.subplots(figsize=(8, 6))
+sns.scatterplot(data=df, x='Soil Porewater Salinity (ppt)', y='Accretion Rate (mm/yr)',
+                hue='NDVI',
+                size='NDVI')
+ax.set_xlabel('Soil Porewater Salinity (ppt)', fontsize=21)
+ax.set_ylabel('Accretion Rate (mm/yr)', fontsize=21)
+ax.tick_params(axis='both', which='major', labelsize=18)
+
+plt.legend(fontsize=14, title='NDVI', title_fontsize=18)
+plt.show()
+fig.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\scatter_salinity_ndvi_accretion.eps",
+            dpi=300, format="eps")
+
+
+# 90th percentile flood plot
+fig, ax = plt.subplots(figsize=(8, 6))
+sns.scatterplot(data=df, x='90th Percentile Flood Depth (cm)', y='Accretion Rate (mm/yr)',
+                hue='Tidal Amplitude (cm)',
+                size='Tidal Amplitude (cm)')
+ax.set_xlabel('90th Percentile Flood Depth (cm)', fontsize=21)
+ax.set_ylabel('Accretion Rate (mm/yr)', fontsize=21)
+ax.tick_params(axis='both', which='major', labelsize=18)
+
+plt.legend(fontsize=14, title='Tidal Amplitude (cm)', title_fontsize=18)
+plt.show()
+fig.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\scatter_flood_tide_accretion.eps",
+            dpi=300, format="eps")
+
+
+# TSS plot
+fig, ax = plt.subplots(figsize=(8, 6))
+sns.scatterplot(data=df, x='TSS (mg/l)', y='Accretion Rate (mm/yr)',
+                hue='Bulk Density (g/cm3)',
+                size='Bulk Density (g/cm3)')
+ax.set_xlabel('TSS (mg/l)', fontsize=21)
+ax.set_ylabel('Accretion Rate (mm/yr)', fontsize=21)
+ax.tick_params(axis='both', which='major', labelsize=18)
+
+plt.legend(fontsize=14, title='Bulk Density (g/cm3)', title_fontsize=18)
+plt.show()
+fig.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\scatter_tss_density_accretion.eps",
+            dpi=300, format="eps")
 
