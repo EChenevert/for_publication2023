@@ -163,7 +163,7 @@ new = pd.concat([agb_gb, df.set_index("Unnamed: 0")], axis=1)
 fig, ax = plt.subplots(figsize=(8, 6))
 sns.scatterplot(ax=ax, data=new, y='NDVI', hue='Aboveground Live Biomass (g/m2)', x='Organic Matter (%)',
                 size='Aboveground Live Biomass (g/m2)')
-ax.set_xlabel('Organic Matter (%)')
+ax.set_xlabel('Organic Matter (%)', fontsize=21)
 ax.set_ylabel("NDVI", fontsize=21)
 plt.legend(fontsize=14, title='Aboveground Live Biomass (g/m2)', title_fontsize=18)
 plt.show()
