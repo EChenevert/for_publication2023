@@ -165,6 +165,8 @@ sns.scatterplot(ax=ax, data=new, y='NDVI', hue='Aboveground Live Biomass (g/m2)'
                 size='Aboveground Live Biomass (g/m2)')
 ax.set_xlabel('Organic Matter (%)', fontsize=21)
 ax.set_ylabel("NDVI", fontsize=21)
+ax.tick_params(axis='both', which='major', labelsize=18)
+
 plt.legend(fontsize=14, title='Aboveground Live Biomass (g/m2)', title_fontsize=18)
 plt.show()
 fig.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_org_scatterplot.eps",
@@ -176,6 +178,8 @@ sns.scatterplot(ax=ax1, data=new, y='NDVI', x='Aboveground Live Biomass (g/m2)',
                 size='Organic Matter (%)')
 ax1.set_xlabel('Aboveground Live Biomass (g/m2)', fontsize=21)
 ax1.set_ylabel("NDVI", fontsize=21)
+ax1.tick_params(axis='both', which='major', labelsize=18)
+
 plt.legend(fontsize=14, title='Organic Matter (%)', title_fontsize=18)
 plt.show()
 fig1.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_biomass_scatterplot.eps",
@@ -188,6 +192,8 @@ sns.scatterplot(data=new, x='90th Percentile Flood Depth (cm)', y='NDVI', hue='T
                 size='Tidal Amplitude (cm)')
 ax2.set_xlabel("90th Percentile Flood Depth (cm)", fontsize=21)
 ax2.set_ylabel("NDVI", fontsize=21)
+ax2.tick_params(axis='both', which='major', labelsize=18)
+
 plt.legend(fontsize=14, title='Tidal Amplitude (cm)', title_fontsize=18)
 plt.show()
 fig2.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_flooddepth_tides_scatterplot.eps",
@@ -200,6 +206,8 @@ sns.scatterplot(data=df, x='90th Percentile Flood Depth (cm)', y='NDVI', hue='Av
                 size='Avg. Time Flooded (%)')
 ax3.set_xlabel("90th Percentile Flood Depth (cm)", fontsize=21)
 ax3.set_ylabel("NDVI", fontsize=21)
+ax3.tick_params(axis='both', which='major', labelsize=18)
+
 plt.legend(fontsize=14, title='Avg. Time Flooded (%)', title_fontsize=18)
 plt.show()
 fig3.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_flooddepth_floodtime_scatterplot.eps",
@@ -213,6 +221,8 @@ sns.scatterplot(data=df, x='90th Percentile Flood Depth (cm)', y='NDVI', hue='Co
                 palette=palette)
 ax4.set_xlabel("90th Percentile Flood Depth (cm)", fontsize=21)
 ax4.set_ylabel("NDVI", fontsize=21)
+ax4.tick_params(axis='both', which='major', labelsize=18)
+
 plt.legend(fontsize=14, title='Community', title_fontsize=18)
 plt.show()
 fig4.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_flooddepth_community_scatterplot.eps",
@@ -224,6 +234,8 @@ sns.scatterplot(data=new, x='90th Percentile Flood Depth (cm)', y='NDVI', hue='A
                 size='Accretion Rate (mm/yr)')
 ax5.set_xlabel("90th Percentile Flood Depth (cm)", fontsize=21)
 ax5.set_ylabel("NDVI", fontsize=21)
+ax5.tick_params(axis='both', which='major', labelsize=18)
+
 plt.legend(fontsize=14, title='Accretion Rate (mm/yr)', title_fontsize=18)
 plt.show()
 fig5.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_flooddepth_accretion_scatterplot.eps",

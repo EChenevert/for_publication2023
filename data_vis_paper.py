@@ -271,7 +271,7 @@ sns.histplot(ax=ax, stat="count", multiple="stack", bins=30,
 ax.set_title("Distribution of Tidal Amplitude (cm)", fontsize=24)
 ax.set_xlabel('Tidal Amplitude (cm)', fontsize=21)
 ax.set_ylabel("Count", fontsize=21)
-
+ax.tick_params(axis='both', which='major', labelsize=18)
 f.legend(fontsize=21)
 f.subplots_adjust(bottom=0.2)
 plt.show()
@@ -289,7 +289,7 @@ sns.histplot(ax=ax, stat="count", multiple="stack", bins=30,
 ax.set_title("Distribution of Soil Porewater Salinity (ppt)", fontsize=24)
 ax.set_xlabel('Soil Porewater Salinity (ppt)', fontsize=21)
 ax.set_ylabel("Count", fontsize=21)
-
+ax.tick_params(axis='both', which='major', labelsize=18)
 f.legend(fontsize=21)
 f.subplots_adjust(bottom=0.2)
 plt.show()
@@ -307,7 +307,7 @@ sns.histplot(ax=ax, stat="count", multiple="stack", bins=30,
 ax.set_title("Distribution of NDVI", fontsize=24)
 ax.set_xlabel("NDVI", fontsize=21)
 ax.set_ylabel("Count", fontsize=21)
-
+ax.tick_params(axis='both', which='major', labelsize=18)
 f.legend(fontsize=21)
 f.subplots_adjust(bottom=0.2)
 plt.show()

@@ -157,7 +157,7 @@ udf = udf.drop(['distance_to_river_m', 'width_mean', 'Distance_to_Water_m', 'Dis
                 'Soil Specific Conductance (uS/cm)',
                 'Soil Porewater Specific Conductance (uS/cm)',
                 'Land_Lost_m2'], axis=1)
-udf = udf.rename(columns={'tss_med': 'TSS (mg/l)'})
+udf = udf.rename(columns={'tss_med': 'TSS (mg/L)'})
 
 # Delete the swamp sites and unammed basin
 udf.drop(udf.index[udf['Community'] == 'Swamp'], inplace=True)
@@ -318,7 +318,7 @@ colormap = {
 'Soil Porewater Salinity (ppt)': '#DD8A8A',
 'Average Height Dominant (cm)': '#137111',
 'NDVI': '#0AFF06',
-'TSS (mg/l)': '#8E6C02',
+'TSS (mg/L)': '#8E6C02',
 'Windspeed (m/s)': '#70ECE3',
 'Tidal Amplitude (cm)': '#434F93',
 'Avg. Flood Depth (cm)': '#087AFA',
