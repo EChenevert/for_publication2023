@@ -609,22 +609,23 @@ def cv_results_and_plot(bay_model, bestfeatures, unscaled_predictor_matrix, pred
                    gridsize=30, edgecolors='grey',
                    cmap=color_scheme['cmap'], mincnt=1)
     ax.set_facecolor('white')
-    ax.set_xlabel("Measured Accretion Rate (mm/yr)")
-    ax.set_ylabel("Estimated Accretion Rate (mm/yr)")
-    ax.set_title(marsh_key + " CRMS Stations")
+    ax.set_xlabel("Measured Accretion Rate (mm/yr)", fontsize=21)
+    ax.set_ylabel("Estimated Accretion Rate (mm/yr)", fontsize=21)
+    ax.set_title(marsh_key + " CRMS Stations", fontsize=21)
+    ax.tick_params(axis='both', which='major', labelsize=18)
     cb = fig.colorbar(hb, ax=ax)
     cb.ax.get_yaxis().labelpad = 20
-    cb.set_label('Density of Predictions', rotation=270)
+    cb.set_label('Density of Predictions', rotation=270, fontsize=21)
 
     # exp10_y = 10 ** target
 
     ax.plot([target.min(), target.max()], [target.min(), target.max()],
             color_scheme['line'], lw=3)
 
-    ax.annotate("Median r-squared = {:.3f}".format(r2_final_median), xy=(20, 410), xycoords='axes points',
+    ax.annotate("Median r-squared = {:.3f}".format(r2_final_median), xy=(190, 30), xycoords='axes points',
                 bbox=dict(boxstyle='round', fc='w'),
                 size=15, ha='left', va='top')
-    ax.annotate("Median MAE = {:.3f}".format(mae_final_median), xy=(20, 380), xycoords='axes points',
+    ax.annotate("Median MAE = {:.3f}".format(mae_final_median), xy=(190, 60), xycoords='axes points',
                 bbox=dict(boxstyle='round', fc='w'),
                 size=15, ha='left', va='top')
     fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\" + marsh_key +

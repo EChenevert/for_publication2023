@@ -409,12 +409,13 @@ hb = ax.hexbin(x=y_ls,
                gridsize=30, edgecolors='grey',
                cmap='YlOrRd', mincnt=1)
 ax.set_facecolor('white')
-ax.set_xlabel("Measured Accretion Rate (mm/yr)")
-ax.set_ylabel("Estimated Accretion Rate (mm/yr)")
-ax.set_title("All CRMS Stations GPR")
+ax.set_xlabel("Measured Accretion Rate (mm/yr)", fontsize=21)
+ax.set_ylabel("Estimated Accretion Rate (mm/yr)", fontsize=21)
+ax.set_title("All CRMS Stations GPR", fontsize=21)
+ax.tick_params(axis='both', which='major', labelsize=18)
 cb = fig.colorbar(hb, ax=ax)
 cb.ax.get_yaxis().labelpad = 20
-cb.set_label('Density of Predictions', rotation=270)
+cb.set_label('Density of Predictions', rotation=270, fontsize=21)
 
 ax.plot([target.min(), target.max()], [target.min(), target.max()],
         "k--", lw=3)

@@ -241,12 +241,18 @@ plt.show()
 fig5.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_flooddepth_accretion_scatterplot.eps",
             dpi=300, format="eps")
 
-# # State that maybe it is flood frequency
-# fig, ax = plt.subplots(figsize=(8, 6))
-# sns.scatterplot(data=new, x='90th Percentile Flood Depth (cm)', y='NDVI', hue='Flood Freq (Floods/yr)',
-#                 size='Flood Freq (Floods/yr)')
-# plt.show()
+# # State that maybe it is related to salinity gradient
+fig2, ax2 = plt.subplots(figsize=(8, 6))
+sns.scatterplot(data=new, x='90th Percentile Flood Depth (cm)', y='NDVI', hue='Soil Porewater Salinity (ppt)',
+                size='Soil Porewater Salinity (ppt)')
+ax2.set_xlabel("90th Percentile Flood Depth (cm)", fontsize=21)
+ax2.set_ylabel("NDVI", fontsize=21)
+ax2.tick_params(axis='both', which='major', labelsize=18)
 
+plt.legend(fontsize=14, title='Soil Porewater Salinity (ppt)', title_fontsize=18)
+plt.show()
+fig2.savefig("D:\\Etienne\\PAPER_2023\\data_vis\\ndvi_flooddepth_salinity_scatterplot.eps",
+            dpi=300, format="eps")
 
 
 

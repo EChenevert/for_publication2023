@@ -107,7 +107,7 @@ f.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\hist_TSS.eps",
 
 ########## Complimenting scatter plots
 # Tidal plot
-fig, ax = plt.subplots(figsize=(8,7))
+fig, ax = plt.subplots(figsize=(8, 6.5))
 sns.scatterplot(data=df, x='Tidal Amplitude (cm)', y='Accretion Rate (mm/yr)',
                 hue='90th Percentile Flood Depth (cm)',
                 size='90th Percentile Flood Depth (cm)')
@@ -122,7 +122,7 @@ fig.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\scatter_tidal_flood_accretion
 
 
 # NDVI plot
-fig, ax = plt.subplots(figsize=(8,7))
+fig, ax = plt.subplots(figsize=(8, 6.5))
 sns.scatterplot(data=df, x='NDVI', y='Accretion Rate (mm/yr)',
                 hue='Soil Porewater Salinity (ppt)',
                 size='Soil Porewater Salinity (ppt)')
@@ -137,7 +137,7 @@ fig.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\scatter_ndvi_salinity_accreti
 
 
 # Salinity plot
-fig, ax = plt.subplots(figsize=(8,7))
+fig, ax = plt.subplots(figsize=(8, 6.5))
 sns.scatterplot(data=df, x='Soil Porewater Salinity (ppt)', y='Accretion Rate (mm/yr)',
                 hue='NDVI',
                 size='NDVI')
@@ -152,7 +152,7 @@ fig.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\scatter_salinity_ndvi_accreti
 
 
 # 90th percentile flood plot
-fig, ax = plt.subplots(figsize=(8,7))
+fig, ax = plt.subplots(figsize=(8, 6.5))
 sns.scatterplot(data=df, x='90th Percentile Flood Depth (cm)', y='Accretion Rate (mm/yr)',
                 hue='Tidal Amplitude (cm)',
                 size='Tidal Amplitude (cm)')
@@ -167,7 +167,7 @@ fig.savefig("D:\\Etienne\\PAPER_2023\\results_GPR\\scatter_flood_tide_accretion.
 
 
 # TSS plot
-fig, ax = plt.subplots(figsize=(8,7))
+fig, ax = plt.subplots(figsize=(8, 6.5))
 sns.scatterplot(data=df, x='TSS (mg/L)', y='Accretion Rate (mm/yr)',
                 hue='Bulk Density (g/cm3)',
                 size='Bulk Density (g/cm3)')

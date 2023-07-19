@@ -343,7 +343,8 @@ for key in hold_marsh_weights:
     ax.set_ylabel("Relative Feature Importance")
     # my_cmap = plt.get_cmap("cool")
     # ax.bar(list(d['index']), list(d['Means']), color='Blue')
-    ax.set_title(str(key) + " CRMS Stations")
+    ax.set_title(str(key) + " CRMS Stations", fontsize=21)
+    # ax.tick_params(axis='both', which='major', labelsize=14)
     # sns.barplot(data=hold_marsh_weights[key], palette="Blues")
     palette_ls = []
     for weight in d['index']:
