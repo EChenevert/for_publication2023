@@ -24,12 +24,12 @@ bysite = main.average_bysite(data)
 
 
 ## Data from CRMS
-url_perc = "https://raw.githubusercontent.com/EChenevert/for_publication2023/blob/main/percentflooded.csv"
+url_perc = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/percentflooded.csv"
 perc = pd.read_csv(url_perc, encoding="unicode escape")
 perc['Simple site'] = [i[:8] for i in perc['Station_ID']]
 perc = perc.groupby('Simple site').median()
 
-url_wl = "https://raw.githubusercontent.com/EChenevert/for_publication2023/blob/main/waterlevelrange.csv"
+url_wl = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/waterlevelrange.csv"
 wl = pd.read_csv(url_wl, encoding="unicode escape")[['Station_ID', 'Tide_Amp (ft)']]
 wl['Simple site'] = [i[:8] for i in wl['Station_ID']]
 wl = wl.groupby('Simple site').median()
@@ -47,12 +47,12 @@ wl = wl.groupby('Simple site').median()
 
 
 ## Data from Gee and Arc
-url_jrc = "https://raw.githubusercontent.com/EChenevert/for_publication2023/blob/main/CRMS_GEE_JRCCOPY2.csv"
+url_jrc = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/CRMS_GEE_JRCCOPY2.csv"
 jrc = pd.read_csv(url_jrc, encoding="unicode_escape")[
     ['Simple_sit', 'Land_Lost_m2']
 ].set_index('Simple_sit')
 
-url_gee = "https://raw.githubusercontent.com/EChenevert/for_publication2023/blob/main/CRMS_GEE60pfrom2007to2022.csv"
+url_gee = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/CRMS_GEE60pfrom2007to2022.csv"
 gee = pd.read_csv(url_gee, encoding="unicode escape")[['Simple_sit', 'NDVI', 'tss_med', 'windspeed']]\
     .groupby('Simple_sit').median().fillna(0)  # filling nans with zeros cuz all nans are in tss because some sites are not near water
 
@@ -63,20 +63,20 @@ gee = pd.read_csv(url_gee, encoding="unicode escape")[['Simple_sit', 'NDVI', 'ts
 #     .groupby('CRMS Site').median().fillna(0)  # filling nans with zeros cuz all nans are in tss because some sites are not near water
 # ########################################################################
 
-url_distRiver = "https://raw.githubusercontent.com/EChenevert/for_publication2023/blob/main/totalDataAndRivers.csv"
+url_distRiver = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/totalDataAndRivers.csv"
 distRiver = pd.read_csv(url_distRiver, encoding="unicode escape")[['Field1', 'distance_to_river_m', 'width_mean']].groupby('Field1').median()
 
-url_nearWater = "https://raw.githubusercontent.com/EChenevert/for_publication2023/blob/main/for_distanceWater_ex.csv"
+url_nearWater = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/for_distanceWater_ex.csv"
 nearWater = pd.read_csv(url_nearWater, encoding="unicode_escape")[
     ['Simple site', 'Distance_to_Water_m']
 ].set_index('Simple site')
 # Add flooding frequency
-url_floodfreq = "https://raw.githubusercontent.com/EChenevert/for_publication2023/blob/main/final_floodfreq.csv"
+url_floodfreq = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/final_floodfreq.csv"
 floodfreq = pd.read_csv(url_floodfreq, encoding="unicode_escape")[[
     'Simple site', 'Flood Freq (Floods/yr)'
 ]].set_index('Simple site')
 # add flood depth when flooded
-url_floodDepth = "https://raw.githubusercontent.com/EChenevert/for_publication2023/blob/main/final_flooddepths.csv"
+url_floodDepth = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/final_flooddepths.csv"
 floodDepth = pd.read_csv(url_floodDepth, encoding="unicode_escape")[[
     'Simple site', 'Avg. Flood Depth when Flooded (ft)', '90th Percentile Flood Depth when Flooded (ft)',
     '10th Percentile Flood Depth when Flooded (ft)', 'Std. Deviation Flood Depth when Flooded '
@@ -100,56 +100,16 @@ udf = tdf.drop([
     'Accretion Measurement 4 (mm)',
     'Month (mm)', 'Average Accretion (mm)', 'Delta time (days)', 'Wet Volume (cm3)',
     'Delta Time (decimal_years)', 'Wet Soil pH (pH units)', 'Dry Soil pH (pH units)', 'Dry Volume (cm3)',
-    'Measurement Depth (ft)', 'Plot Size (m2)', '% Cover Shrub', '% Cover Carpet', 'Direction (Collar Number)',
-    'Direction (Compass Degrees)', 'Pin Number', 'Observed Pin Height (mm)', 'Verified Pin Height (mm)',
-    'percent_waterlevel_complete',  # 'calendar_year',
-    'Average Height Shrub (cm)', 'Average Height Carpet (cm)'  # I remove these because most values are nan and these vars are unimportant really
-
+    'percent_waterlevel_complete'
 ], axis=1)
 
 
 # Address the vertical measurement for mass calculation (wit the potential of switching between my accretion and
 # CRMS accretion)
 vertical = 'Accretion Rate (mm/yr)'
-# if vertical == 'Accretion Rate (mm/yr)':
-#     udf = udf.drop('Acc_rate_fullterm (cm/y)', axis=1)
-#     # Make sure multiplier of mass acc is in the right units
-#     # udf['Average_Ac_cm_yr'] = udf['Accretion Rate (mm/yr)'] / 10  # mm to cm conversion
-#     # Make sure subsidence and RSLR are in correct units
-#     udf['Shallow Subsidence Rate (mm/yr)'] = udf[vertical] - udf['Surface Elevation Change Rate (cm/y)'] * 10
-#     udf['Shallow Subsidence Rate (mm/yr)'] = [0 if val < 0 else val for val in udf['Shallow Subsidence Rate (mm/yr)']]
-#     udf['SEC Rate (mm/yr)'] = udf['Surface Elevation Change Rate (cm/y)'] * 10
-#     # Now calcualte subsidence and RSLR
-#     # Make the subsidence and rslr variables: using the
-#     udf['SLR (mm/yr)'] = 2.0  # from jankowski
-#     udf['Deep Subsidence Rate (mm/yr)'] = ((3.7147 * udf['Latitude']) - 114.26) * -1
-#     udf['RSLR (mm/yr)'] = udf['Shallow Subsidence Rate (mm/yr)'] + udf['Deep Subsidence Rate (mm/yr)'] + udf[
-#         'SLR (mm/yr)']
-#     udf = udf.drop(['SLR (mm/yr)'],
-#                    axis=1)  # obviously drop because it is the same everywhere ; only used for calc
-#
-# elif vertical == 'Acc_rate_fullterm (cm/y)':
-#     udf = udf.drop('Accretion Rate (mm/yr)', axis=1)
-#     #  Make sure multiplier of mass acc is in the right units
-#     # udf['Average_Ac_cm_yr'] = udf[vertical]
-#     # Make sure subsidence and RSLR are in correct units
-#     udf['Shallow Subsidence Rate (mm/yr)'] = (udf[vertical] - udf['Surface Elevation Change Rate (cm/y)'])*10
-#     udf['SEC Rate (cm/yr)'] = udf['Surface Elevation Change Rate (cm/y)']
-#     # Now calcualte subsidence and RSLR
-#     # Make the subsidence and rslr variables: using the
-#     udf['SLR (mm/yr)'] = 2.0  # from jankowski
-#     udf['Deep Subsidence Rate (mm/yr)'] = ((3.7147 * udf['Latitude']) - 114.26) * -1
-#     udf['RSLR (mm/yr)'] = udf['Shallow Subsidence Rate (mm/yr)'] + udf['Deep Subsidence Rate (mm/yr)'] + udf[
-#         'SLR (mm/yr)']*0.1
-#     udf = udf.drop(['SLR (mm/yr)'],
-#                    axis=1)  # obviously drop because it is the same everywhere ; only used for calc
-# else:
-#     print("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
 
 ####### Define outcome as vertical component
 outcome = 'Accretion Rate (mm/yr)'
-
-# udf.to_csv("D:\\Etienne\\fall2022\\agu_data\\results\\AGU_dataset_noOutlierRm.csv")
 
 # Try to semi-standardize variables
 des = udf.describe()  # just to identify which variables are way of the scale
@@ -160,9 +120,8 @@ udf['distance_to_water_km'] = udf['Distance_to_Water_m']/1000
 udf['land_lost_km2'] = udf['Land_Lost_m2']*0.000001  # convert to km2
 
 # Drop remade variables
-udf = udf.drop(['distance_to_river_m', 'width_mean', 'Distance_to_Water_m', # 'Distance_to_Ocean_m',
+udf = udf.drop(['distance_to_river_m', 'width_mean', 'Distance_to_Water_m',
                 'Soil Specific Conductance (uS/cm)',
-                'Soil Porewater Specific Conductance (uS/cm)',
                 'Land_Lost_m2'], axis=1)
 udf = udf.rename(columns={'tss_med': 'TSS (mg/L)'})
 
@@ -176,18 +135,12 @@ udf = udf.drop([  # IM BEING RISKY AND KEEP SHALLOW SUBSIDENCE RATE
     # 'Shallow Subsidence Rate (mm/yr)',  # potentially encoding info about accretion
     # taking out water level features because they are not super informative
     # Putting Human in the loop
-    'Staff Gauge (ft)', 'Soil Salinity (ppt)',
+    'Soil Salinity (ppt)',
     'river_width_mean_km',   # 'log_river_width_mean_km',  # i just dont like this variable because it has a sucky distribution
-
     # Delete the dominant herb cuz of rendundancy with dominant veg
     'Average Height Herb (cm)',
-    # Test delete
-    # '10th Percentile Flood Depth when Flooded (ft)', '90th Percentile Flood Depth when Flooded (ft)',
-    # other weird ones
-    'Soil Porewater Temperature (°C)',
-    # 'Average_Marsh_Elevation (ft. NAVD88)',
-     'Organic Density (g/cm3)',  # 'Bulk Density (g/cm3)',
-    'Soil Moisture Content (%)',  # 'Organic Matter (%)',  # do not use organic matter because it has a negative relationship, hard for me to interpret --> i think just picks up the bulk density relationship. Or relationship that sites with higher organic matter content tend to have less accretion
+     'Organic Density (g/cm3)',
+    'Soil Moisture Content (%)',
     'land_lost_km2'
 ], axis=1)
 # conduct outlier removal which drops all nans
@@ -196,9 +149,7 @@ rdf = funcs.max_interquartile_outlierrm(udf.drop(['Community', 'Latitude', 'Long
 # transformations (basically log transforamtions) --> the log actually kinda regularizes too
 rdf['log_distance_to_water_km'] = [np.log(val) if val > 0 else 0 for val in rdf['distance_to_water_km']]
 rdf['log_distance_to_river_km'] = [np.log(val) if val > 0 else 0 for val in rdf['distance_to_river_km']]
-rdf['log_distance_to_ocean_km'] = [np.log10(val) if val > 0 else 0 for val in rdf['distance_to_ocean_km']]
-# rdf['Average Height Dominant (mm)'] = rdf['Average Height Dominant (cm)'] * 10
-# rdf['Average Height Herb (mm)'] = rdf['Average Height Herb (cm)'] * 10
+
 # drop the old features
 rdf = rdf.drop(['distance_to_water_km', 'distance_to_river_km'], axis=1)
 
@@ -207,7 +158,6 @@ rdf = rdf.rename(columns={
     'Tide_Amp (ft)': 'Tide Amp (ft)',
     'avg_percentflooded (%)': 'Avg. Time Flooded (%)',
     'windspeed': 'Windspeed (m/s)',
-
     # 'log_distance_to_ocean_km': 'Log Distance to Ocean (km)',
     'log_distance_to_water_km': 'Log Distance to Water (km)',
     'log_distance_to_river_km': 'Log Distance to River (km)',

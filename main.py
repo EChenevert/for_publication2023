@@ -1,26 +1,33 @@
 import numpy as np
 import pandas as pd
+import os
 import urllib.request
 from zipfile import ZipFile
 from io import StringIO
 from io import BytesIO
 
 # Functions used to load data
-def organized_iteryears(date_col_name, df):
+def read_data_file(filename):
+    current_dir = os.path.dirname(__file__)
+    # data_dir = os.path.join(current_dir, 'data')
+    file_path = os.path.join(current_dir, filename)
+    return file_path
+
+def organized_iteryears(date_col_name, df, given):
     ''' This method creates a data column that indicates what year the sample
     (or data) was collected or observed '''
-    datetimeArr = pd.to_datetime(df[date_col_name], format='%m/%d/%Y')
+    datetimeArr = pd.to_datetime(df[date_col_name], format=given)
     years = datetimeArr.dt.year
     return years
 
 
-def organized_itermons(date_col_name, df):
+def organized_itermons(date_col_name, df, given):
     '''This is an iterdates method for the hydro data, which is logged into
     the csv more cleaning. This increases speed
     @params:
         date_col_names = is the name of the date column
         df = is the dataframe the date column is in'''
-    datetimeArr = pd.to_datetime(df[date_col_name], format='%m/%d/%Y')
+    datetimeArr = pd.to_datetime(df[date_col_name], format=given)
     months = datetimeArr.dt.month
     return months
 
@@ -76,34 +83,20 @@ def load_data():
     # Monthly Hydrographic
     url_monthly_hydro = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/CRMS_Discrete_Hydrographic.csv"
     monthly_hydro = pd.read_csv(url_monthly_hydro, encoding='unicode escape')
-
-
     # Marsh Vegetation
     url_marsh_veg = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/CRMS_Marsh_Vegetation.csv"
     marsh_vegetation = pd.read_csv(url_marsh_veg, encoding='unicode escape')
-
-    # link_marsh_veg = "https://github.com/EChenevert/for_publication2023/blob/0ce48c9910469b9773872da9b71c10788d78d175/CRMS_Marsh_Vegetation_compressed.csv.zip"
-    # url_marsh_veg = urllib.request.urlopen(link_marsh_veg)
-    # # url_marsh_veg = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/CRMS_Marsh_Vegetation_compressed.csv.zip"
-    # with ZipFile(BytesIO(url_marsh_veg.read())) as my_zip_file:
-    #     for contained_file in my_zip_file.namelist():
-    #         fzip = my_zip_file.open(contained_file)
-    #         data = fzip.read()
-    # # Convert bytes data to string data
-    # s = str(data, 'utf-8')
-    # data = StringIO(s)
-    # # convert it to pandas DataFrame as normal csv file
-    # marsh_vegetation = pd.read_csv(data)
-
-
     # Accretion
     url_accretion = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/CRMS_Accretion.csv"
     accretion = pd.read_csv(url_accretion, encoding='unicode escape')
-    # # Biomass
-    # url_bio = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/CRMS_Biomass.csv"
-    # biomass = pd.read_csv(url_bio, encoding='unicode escape')
+    # # # Biomass
+    # # url_bio = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/CRMS_Biomass.csv"
+    # # biomass = pd.read_csv(url_bio, encoding='unicode escape')
 
-    # surface_elevation = pd.read_csv(r"D:\Etienne\summer2022_CRMS\run_experiments\CRMS_Surface_Elevation\CRMS_Surface_Elevation.csv", encoding='unicode escape')
+    # # Trying through directory
+    # soil_properties = pd.read_csv(read_data_file("CRMS_Soil_Properties.csv"), encoding="unicode_escape")
+    # accretion = pd.read_csv(read_data_file("CRMS_Accretion.csv"), encoding="unicode_escape")
+    # marsh_vegetation = pd.read_csv(read_data_file("CRMS_Marsh_Vegetation.csv"), encoding="unicode_escape")
 
     dfs = [
         accretion,
@@ -124,21 +117,21 @@ def load_data():
         # if 'calendar_year' in dfs[d].columns:
         #     dfs[d]['Year (yyyy)'] = dfs[d]['calendar_year']
         if 'Sample Date (mm/dd/yyyy)' in d.columns:  # Accretion, soil properties, surface elevation
-            d['Year (yyyy)'] = organized_iteryears('Sample Date (mm/dd/yyyy)', d)
+            d['Year (yyyy)'] = organized_iteryears('Sample Date (mm/dd/yyyy)', d, '%m/%d/%Y')
         if 'Date (mm/dd/yyyy)' in d.columns:  # Monthly Hydro,
             d['Year (yyyy)'] = organized_iteryears('Date (mm/dd/yyyy)', d)
         if 'Collection Date (mm/dd/yyyy)' in d.columns:  # Marsh Veg,
-            d['Year (yyyy)'] = organized_iteryears('Collection Date (mm/dd/yyyy)', d)
+            d['Year (yyyy)'] = organized_iteryears('Collection Date (mm/dd/yyyy)', d, '%m/%d/%y')
 
         # # Set the MONTHLY dates
         # if 'calendar_year' in dfs[d].columns:
         #     dfs[d]['Month (mm)'] = 0  # this means that this data is averaged over a length of years so there is no monthly data
         if 'Sample Date (mm/dd/yyyy)' in d.columns:  # Accretion, soil properties, surface elevation
-            d['Month (mm)'] = organized_itermons('Sample Date (mm/dd/yyyy)', d)
+            d['Month (mm)'] = organized_itermons('Sample Date (mm/dd/yyyy)', d, '%m/%d/%Y')
         if 'Date (mm/dd/yyyy)' in d.columns:  # Monthly Hydro,
             d['Month (mm)'] = organized_itermons('Date (mm/dd/yyyy)', d)
         if 'Collection Date (mm/dd/yyyy)' in d.columns:  # Marsh Veg,
-            d['Month (mm)'] = organized_itermons('Collection Date (mm/dd/yyyy)', d)
+            d['Month (mm)'] = organized_itermons('Collection Date (mm/dd/yyyy)', d, '%m/%d/%y')
 
 
         # Add basins: I manually put each site into a basin category, this was done from the CRMS louisiana website map
