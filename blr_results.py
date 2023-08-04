@@ -313,10 +313,10 @@ fig, ax = plt.subplots(figsize=(6, 4))
 ax.set_title('Distribution of Learned Effective Regularization Parameters')
 sns.boxplot(data=eff_reg_df, notch=True, showfliers=False, palette="YlOrBr")
 funcs.wrap_labels(ax, 10)
-fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\regularization_scaledX_nolog_boxplot_human.eps",
-            format='eps',
-            dpi=300,
-            bbox_inches='tight')
+# fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\regularization_scaledX_nolog_boxplot_human.eps",
+#             format='eps',
+#             dpi=300,
+#             bbox_inches='tight')
 plt.show()
 
 
