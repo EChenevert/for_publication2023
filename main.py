@@ -101,7 +101,7 @@ def load_data():
     dfs = [
         accretion,
         soil_properties,
-        # monthly_hydro,
+        monthly_hydro,
         marsh_vegetation,
     ]
     # Making a common column for dtermining the site name
@@ -119,7 +119,7 @@ def load_data():
         if 'Sample Date (mm/dd/yyyy)' in d.columns:  # Accretion, soil properties, surface elevation
             d['Year (yyyy)'] = organized_iteryears('Sample Date (mm/dd/yyyy)', d, '%m/%d/%Y')
         if 'Date (mm/dd/yyyy)' in d.columns:  # Monthly Hydro,
-            d['Year (yyyy)'] = organized_iteryears('Date (mm/dd/yyyy)', d)
+            d['Year (yyyy)'] = organized_iteryears('Date (mm/dd/yyyy)', d, '%m/%d/%y')
         if 'Collection Date (mm/dd/yyyy)' in d.columns:  # Marsh Veg,
             d['Year (yyyy)'] = organized_iteryears('Collection Date (mm/dd/yyyy)', d, '%m/%d/%y')
 
@@ -129,7 +129,7 @@ def load_data():
         if 'Sample Date (mm/dd/yyyy)' in d.columns:  # Accretion, soil properties, surface elevation
             d['Month (mm)'] = organized_itermons('Sample Date (mm/dd/yyyy)', d, '%m/%d/%Y')
         if 'Date (mm/dd/yyyy)' in d.columns:  # Monthly Hydro,
-            d['Month (mm)'] = organized_itermons('Date (mm/dd/yyyy)', d)
+            d['Month (mm)'] = organized_itermons('Date (mm/dd/yyyy)', d, '%m/%d/%y')
         if 'Collection Date (mm/dd/yyyy)' in d.columns:  # Marsh Veg,
             d['Month (mm)'] = organized_itermons('Collection Date (mm/dd/yyyy)', d, '%m/%d/%y')
 

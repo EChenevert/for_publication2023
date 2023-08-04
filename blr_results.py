@@ -34,18 +34,6 @@ wl = pd.read_csv(url_wl, encoding="unicode escape")[['Station_ID', 'Tide_Amp (ft
 wl['Simple site'] = [i[:8] for i in wl['Station_ID']]
 wl = wl.groupby('Simple site').median()
 
-# marshElev = pd.read_csv(r"D:\Etienne\fall2022\CRMS_data\bayes2year\12009_Survey_Marsh_Elevation\12009_Survey_Marsh_Elevation.csv",
-#                         encoding="unicode escape").groupby('SiteId').median().drop('Unnamed: 4', axis=1)
-# SEC = pd.read_csv(r"D:\Etienne\fall2022\agu_data\12017_SurfaceElevation_ChangeRate\12017.csv",
-#                   encoding="unicode escape")
-# SEC['Simple site'] = [i[:8] for i in SEC['Station_ID']]
-# SEC = SEC.groupby('Simple site').median().drop('Unnamed: 4', axis=1)
-#
-# acc = pd.read_csv(r"D:\Etienne\fall2022\agu_data\12172_SEA\Accretion__rate.csv", encoding="unicode_escape")[
-#     ['Site_ID', 'Acc_rate_fullterm (cm/y)']
-# ].groupby('Site_ID').median()
-
-
 ## Data from Gee and Arc
 url_jrc = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/CRMS_GEE_JRCCOPY2.csv"
 jrc = pd.read_csv(url_jrc, encoding="unicode_escape")[
@@ -56,12 +44,6 @@ url_gee = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main
 gee = pd.read_csv(url_gee, encoding="unicode escape")[['Simple_sit', 'NDVI', 'tss_med', 'windspeed']]\
     .groupby('Simple_sit').median().fillna(0)  # filling nans with zeros cuz all nans are in tss because some sites are not near water
 
-
-# ############# Attempting the SAVI switch #########################
-# gee = pd.read_csv(r"D:\Etienne\fall2022\agu_data\CRMS_GEE60perc_wSAVI.csv",
-#                           encoding="unicode escape")[['CRMS Site', 'SAVI', 'tss_med', 'Windspeed (m/s)']]\
-#     .groupby('CRMS Site').median().fillna(0)  # filling nans with zeros cuz all nans are in tss because some sites are not near water
-# ########################################################################
 
 url_distRiver = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/totalDataAndRivers.csv"
 distRiver = pd.read_csv(url_distRiver, encoding="unicode escape")[['Field1', 'distance_to_river_m', 'width_mean']].groupby('Field1').median()
@@ -86,9 +68,6 @@ floodDepth = pd.read_csv(url_floodDepth, encoding="unicode_escape")[[
 df = pd.concat([bysite, distRiver, nearWater, gee, jrc, wl, perc, floodfreq, floodDepth],
                axis=1, join='outer')
 
-# df.to_csv("D:\\Etienne\\fall2022\\agu_data\\results\\minimal_preprocessing.csv")
-
-
 # Now clean the columns
 # First delete columns that are more than 1/2 nans
 tdf = df.dropna(thresh=df.shape[0]*0.5, how='all', axis=1)
@@ -97,7 +76,7 @@ tdf = df.dropna(thresh=df.shape[0]*0.5, how='all', axis=1)
 udf = tdf.drop([
     'Year (yyyy)', 'Accretion Measurement 1 (mm)', 'Year',
     'Accretion Measurement 2 (mm)', 'Accretion Measurement 3 (mm)',
-    'Accretion Measurement 4 (mm)',
+    'Accretion Measurement 4 (mm)', 'Measurement Depth (ft)',
     'Month (mm)', 'Average Accretion (mm)', 'Delta time (days)', 'Wet Volume (cm3)',
     'Delta Time (decimal_years)', 'Wet Soil pH (pH units)', 'Dry Soil pH (pH units)', 'Dry Volume (cm3)',
     'percent_waterlevel_complete'
@@ -116,7 +95,6 @@ des = udf.describe()  # just to identify which variables are way of the scale
 udf['distance_to_river_km'] = udf['distance_to_river_m']/1000  # convert to km
 udf['river_width_mean_km'] = udf['width_mean']/1000
 udf['distance_to_water_km'] = udf['Distance_to_Water_m']/1000
-# udf['distance_to_ocean_km'] = udf['Distance_to_Ocean_m']/1000
 udf['land_lost_km2'] = udf['Land_Lost_m2']*0.000001  # convert to km2
 
 # Drop remade variables
@@ -127,19 +105,15 @@ udf = udf.rename(columns={'tss_med': 'TSS (mg/L)'})
 
 # Delete the swamp sites and unammed basin
 udf.drop(udf.index[udf['Community'] == 'Swamp'], inplace=True)
-# udf.drop(udf.index[udf['Basins'] == 'Unammed_basin'], inplace=True)
 udf = udf.drop('Basins', axis=1)
 # ----
-udf = udf.drop([  # IM BEING RISKY AND KEEP SHALLOW SUBSIDENCE RATE
-    # 'Surface Elevation Change Rate (cm/y)', 'Deep Subsidence Rate (mm/yr)', 'RSLR (mm/yr)', 'SEC Rate (mm/yr)',
-    # 'Shallow Subsidence Rate (mm/yr)',  # potentially encoding info about accretion
-    # taking out water level features because they are not super informative
-    # Putting Human in the loop
+udf = udf.drop([
+    'Staff Gauge (ft)', 'Soil Porewater Temperature (¡C)', 'Soil Porewater Specific Conductance (uS/cm)',
     'Soil Salinity (ppt)',
     'river_width_mean_km',   # 'log_river_width_mean_km',  # i just dont like this variable because it has a sucky distribution
     # Delete the dominant herb cuz of rendundancy with dominant veg
     'Average Height Herb (cm)',
-     'Organic Density (g/cm3)',
+    'Organic Density (g/cm3)',
     'Soil Moisture Content (%)',
     'land_lost_km2'
 ], axis=1)
@@ -182,11 +156,6 @@ gdf['Std. Deviation Flood Depth (cm)'] = gdf['Std. Deviation Flood Depth (ft)'] 
 gdf = gdf.drop(['Std. Deviation Flood Depth (ft)', 'Avg. Flood Depth (ft)', '10th Percentile Flood Depth (ft)',
                 '90th Percentile Flood Depth (ft)', 'Tide Amp (ft)'], axis=1)
 
-# Export gdf to file specifically for AGU data and results
-# gdf.to_csv("D:\\Etienne\\fall2022\\agu_data\\results\\AGU_dataset.csv")
-# gdf = gdf.drop('distance_to_ocean_km', axis=1)  # why?
-# split into marsh datasets
-
 brackdf = gdf[gdf['Community'] == 'Brackish']
 saldf = gdf[gdf['Community'] == 'Saline']
 freshdf = gdf[gdf['Community'] == 'Freshwater']
@@ -209,9 +178,7 @@ hold_prediction_certainty = {}
 
 for key in marshdic:
     print(key)
-    mdf = marshdic[key]  # .drop('Community', axis=1)
-    # It is preshuffled so i do not think ordering will be a problem
-    # t = np.log10(mdf[outcome].reset_index().drop('index', axis=1))
+    mdf = marshdic[key]
     t = mdf[outcome].reset_index().drop('index', axis=1)
     phi = mdf.drop([outcome, 'Community', 'Latitude', 'Longitude',  'Organic Matter (%)', 'Bulk Density (g/cm3)',
                     ],
@@ -245,11 +212,8 @@ colormap = {
 'Tidal Amplitude (cm)': '#434F93',
 'Avg. Flood Depth (cm)': '#087AFA',
 'SAVI':  '#087AFD',
-# '90th Percentile of Waterlevel to Marsh (ft)': '#D001A1',
 '90th Percentile Flood Depth (cm)': '#D000E1',
-# '10th Percentile of Waterlevel to Marsh (ft)': '#73ABAE',
 '10th Percentile Flood Depth (cm)': '#73ACAE',
-# 'Std. Deviation of Flooding (ft)': '#DE5100',
 'Std. Deviation Flood Depth (cm)': '#DE5100',
 'Avg. Time Flooded (%)': '#970CBD',
 'Flood Freq (Floods/yr)': '#EB0000',
@@ -329,7 +293,7 @@ fig, ax = plt.subplots(figsize=(6, 4))
 ax.set_title('Distribution of Calculated Number of Well Determined Parameters')
 sns.boxplot(data=certainty_df, notch=True, showfliers=False, palette="Blues")
 funcs.wrap_labels(ax, 10)
-# fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\certainty_scaledX_nolog_boxplot_human.eps",
+# fig.savefig("__ENTER LOCATION TO SAVE__",
 #             format='eps',
 #             dpi=300,
 #             bbox_inches='tight')
@@ -346,7 +310,7 @@ ax.set_title('Distribution of Intercepts [Unscaled]:')
 ax.axhline(0, ls='--')
 sns.boxplot(data=intercept_df, notch=True, showfliers=False, palette="coolwarm")
 funcs.wrap_labels(ax, 10)
-# fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\intercepts_nolog_boxplot_human.eps", dpi=300,
+# fig.savefig("__ENTER LOCATION TO SAVE__", dpi=300,
 #             format='eps',
 #             bbox_inches='tight')
 plt.show()
@@ -361,7 +325,7 @@ fig, ax = plt.subplots(figsize=(6, 4))
 ax.set_title('Distribution of Bayesian Uncertainty in Predictions')
 sns.boxplot(data=pred_certainty_df, notch=True, showfliers=False, palette="Reds")
 funcs.wrap_labels(ax, 10)
-# fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\pred_certainty_scaledX_nolog_boxplot_human.eps",
+# fig.savefig("__ENTER LOCATION TO SAVE__",
 #             dpi=300, format='eps',
 #             bbox_inches='tight')
 plt.show()
