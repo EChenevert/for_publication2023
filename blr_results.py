@@ -24,34 +24,36 @@ bysite = main.average_bysite(data)
 
 
 ## Data from CRMS
-perc = pd.read_csv(r"D:\Etienne\fall2022\agu_data\percentflooded.csv",
-                   encoding="unicode escape")
+url_perc = "https://raw.githubusercontent.com/EChenevert/for_publication2023/blob/main/percentflooded.csv"
+perc = pd.read_csv(url_perc, encoding="unicode escape")
 perc['Simple site'] = [i[:8] for i in perc['Station_ID']]
 perc = perc.groupby('Simple site').median()
-wl = pd.read_csv(r"D:\Etienne\fall2022\agu_data\waterlevelrange.csv",
-                 encoding="unicode escape")[['Station_ID', 'Tide_Amp (ft)']]
+
+url_wl = "https://raw.githubusercontent.com/EChenevert/for_publication2023/blob/main/waterlevelrange.csv"
+wl = pd.read_csv(url_wl, encoding="unicode escape")[['Station_ID', 'Tide_Amp (ft)']]
 wl['Simple site'] = [i[:8] for i in wl['Station_ID']]
 wl = wl.groupby('Simple site').median()
 
-marshElev = pd.read_csv(r"D:\Etienne\fall2022\CRMS_data\bayes2year\12009_Survey_Marsh_Elevation\12009_Survey_Marsh_Elevation.csv",
-                        encoding="unicode escape").groupby('SiteId').median().drop('Unnamed: 4', axis=1)
-SEC = pd.read_csv(r"D:\Etienne\fall2022\agu_data\12017_SurfaceElevation_ChangeRate\12017.csv",
-                  encoding="unicode escape")
-SEC['Simple site'] = [i[:8] for i in SEC['Station_ID']]
-SEC = SEC.groupby('Simple site').median().drop('Unnamed: 4', axis=1)
-
-acc = pd.read_csv(r"D:\Etienne\fall2022\agu_data\12172_SEA\Accretion__rate.csv", encoding="unicode_escape")[
-    ['Site_ID', 'Acc_rate_fullterm (cm/y)']
-].groupby('Site_ID').median()
+# marshElev = pd.read_csv(r"D:\Etienne\fall2022\CRMS_data\bayes2year\12009_Survey_Marsh_Elevation\12009_Survey_Marsh_Elevation.csv",
+#                         encoding="unicode escape").groupby('SiteId').median().drop('Unnamed: 4', axis=1)
+# SEC = pd.read_csv(r"D:\Etienne\fall2022\agu_data\12017_SurfaceElevation_ChangeRate\12017.csv",
+#                   encoding="unicode escape")
+# SEC['Simple site'] = [i[:8] for i in SEC['Station_ID']]
+# SEC = SEC.groupby('Simple site').median().drop('Unnamed: 4', axis=1)
+#
+# acc = pd.read_csv(r"D:\Etienne\fall2022\agu_data\12172_SEA\Accretion__rate.csv", encoding="unicode_escape")[
+#     ['Site_ID', 'Acc_rate_fullterm (cm/y)']
+# ].groupby('Site_ID').median()
 
 
 ## Data from Gee and Arc
-jrc = pd.read_csv(r"D:\Etienne\summer2022_CRMS\run_experiments\CRMS_GEE_JRCCOPY2.csv", encoding="unicode_escape")[
+url_jrc = "https://raw.githubusercontent.com/EChenevert/for_publication2023/blob/main/CRMS_GEE_JRCCOPY2.csv"
+jrc = pd.read_csv(url_jrc, encoding="unicode_escape")[
     ['Simple_sit', 'Land_Lost_m2']
 ].set_index('Simple_sit')
 
-gee = pd.read_csv(r"D:\Etienne\fall2022\agu_data\CRMS_GEE60pfrom2007to2022.csv",
-                          encoding="unicode escape")[['Simple_sit', 'NDVI', 'tss_med', 'windspeed']]\
+url_gee = "https://raw.githubusercontent.com/EChenevert/for_publication2023/blob/main/CRMS_GEE60pfrom2007to2022.csv"
+gee = pd.read_csv(url_gee, encoding="unicode escape")[['Simple_sit', 'NDVI', 'tss_med', 'windspeed']]\
     .groupby('Simple_sit').median().fillna(0)  # filling nans with zeros cuz all nans are in tss because some sites are not near water
 
 
@@ -61,26 +63,30 @@ gee = pd.read_csv(r"D:\Etienne\fall2022\agu_data\CRMS_GEE60pfrom2007to2022.csv",
 #     .groupby('CRMS Site').median().fillna(0)  # filling nans with zeros cuz all nans are in tss because some sites are not near water
 # ########################################################################
 
-distRiver = pd.read_csv(r"D:\Etienne\fall2022\CRMS_data\totalDataAndRivers.csv",
-                        encoding="unicode escape")[['Field1', 'distance_to_river_m', 'width_mean']].groupby('Field1').median()
-nearWater = pd.read_csv(r"D:\Etienne\fall2022\agu_data\ALLDATA2.csv", encoding="unicode_escape")[
-    ['Simple site', 'Distance_to_Water_m', 'Distance_to_Ocean_m']
+url_distRiver = "https://raw.githubusercontent.com/EChenevert/for_publication2023/blob/main/totalDataAndRivers.csv"
+distRiver = pd.read_csv(url_distRiver, encoding="unicode escape")[['Field1', 'distance_to_river_m', 'width_mean']].groupby('Field1').median()
+
+url_nearWater = "https://raw.githubusercontent.com/EChenevert/for_publication2023/blob/main/for_distanceWater_ex.csv"
+nearWater = pd.read_csv(url_nearWater, encoding="unicode_escape")[
+    ['Simple site', 'Distance_to_Water_m']
 ].set_index('Simple site')
 # Add flooding frequency
-floodfreq = pd.read_csv(r"D:\Etienne\PAPER_2023\CRMS_Continuous_Hydrographic\floodingsplits\final_floodfreq.csv", encoding="unicode_escape")[[
+url_floodfreq = "https://raw.githubusercontent.com/EChenevert/for_publication2023/blob/main/final_floodfreq.csv"
+floodfreq = pd.read_csv(url_floodfreq, encoding="unicode_escape")[[
     'Simple site', 'Flood Freq (Floods/yr)'
 ]].set_index('Simple site')
 # add flood depth when flooded
-floodDepth = pd.read_csv(r"D:\Etienne\PAPER_2023\CRMS_Continuous_Hydrographic\flooddepthsplits\final_flooddepths.csv", encoding="unicode_escape")[[
+url_floodDepth = "https://raw.githubusercontent.com/EChenevert/for_publication2023/blob/main/final_flooddepths.csv"
+floodDepth = pd.read_csv(url_floodDepth, encoding="unicode_escape")[[
     'Simple site', 'Avg. Flood Depth when Flooded (ft)', '90th Percentile Flood Depth when Flooded (ft)',
     '10th Percentile Flood Depth when Flooded (ft)', 'Std. Deviation Flood Depth when Flooded '
 ]].set_index('Simple site')
 
 # Concatenate
-df = pd.concat([bysite, distRiver, nearWater, gee, jrc, wl, perc, SEC, floodfreq, floodDepth, acc, marshElev],
+df = pd.concat([bysite, distRiver, nearWater, gee, jrc, wl, perc, floodfreq, floodDepth],
                axis=1, join='outer')
 
-df.to_csv("D:\\Etienne\\fall2022\\agu_data\\results\\minimal_preprocessing.csv")
+# df.to_csv("D:\\Etienne\\fall2022\\agu_data\\results\\minimal_preprocessing.csv")
 
 
 # Now clean the columns
@@ -105,55 +111,56 @@ udf = tdf.drop([
 # Address the vertical measurement for mass calculation (wit the potential of switching between my accretion and
 # CRMS accretion)
 vertical = 'Accretion Rate (mm/yr)'
-if vertical == 'Accretion Rate (mm/yr)':
-    udf = udf.drop('Acc_rate_fullterm (cm/y)', axis=1)
-    # Make sure multiplier of mass acc is in the right units
-    # udf['Average_Ac_cm_yr'] = udf['Accretion Rate (mm/yr)'] / 10  # mm to cm conversion
-    # Make sure subsidence and RSLR are in correct units
-    udf['Shallow Subsidence Rate (mm/yr)'] = udf[vertical] - udf['Surface Elevation Change Rate (cm/y)'] * 10
-    udf['Shallow Subsidence Rate (mm/yr)'] = [0 if val < 0 else val for val in udf['Shallow Subsidence Rate (mm/yr)']]
-    udf['SEC Rate (mm/yr)'] = udf['Surface Elevation Change Rate (cm/y)'] * 10
-    # Now calcualte subsidence and RSLR
-    # Make the subsidence and rslr variables: using the
-    udf['SLR (mm/yr)'] = 2.0  # from jankowski
-    udf['Deep Subsidence Rate (mm/yr)'] = ((3.7147 * udf['Latitude']) - 114.26) * -1
-    udf['RSLR (mm/yr)'] = udf['Shallow Subsidence Rate (mm/yr)'] + udf['Deep Subsidence Rate (mm/yr)'] + udf[
-        'SLR (mm/yr)']
-    udf = udf.drop(['SLR (mm/yr)'],
-                   axis=1)  # obviously drop because it is the same everywhere ; only used for calc
-
-elif vertical == 'Acc_rate_fullterm (cm/y)':
-    udf = udf.drop('Accretion Rate (mm/yr)', axis=1)
-    #  Make sure multiplier of mass acc is in the right units
-    # udf['Average_Ac_cm_yr'] = udf[vertical]
-    # Make sure subsidence and RSLR are in correct units
-    udf['Shallow Subsidence Rate (mm/yr)'] = (udf[vertical] - udf['Surface Elevation Change Rate (cm/y)'])*10
-    udf['SEC Rate (cm/yr)'] = udf['Surface Elevation Change Rate (cm/y)']
-    # Now calcualte subsidence and RSLR
-    # Make the subsidence and rslr variables: using the
-    udf['SLR (mm/yr)'] = 2.0  # from jankowski
-    udf['Deep Subsidence Rate (mm/yr)'] = ((3.7147 * udf['Latitude']) - 114.26) * -1
-    udf['RSLR (mm/yr)'] = udf['Shallow Subsidence Rate (mm/yr)'] + udf['Deep Subsidence Rate (mm/yr)'] + udf[
-        'SLR (mm/yr)']*0.1
-    udf = udf.drop(['SLR (mm/yr)'],
-                   axis=1)  # obviously drop because it is the same everywhere ; only used for calc
-else:
-    print("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+# if vertical == 'Accretion Rate (mm/yr)':
+#     udf = udf.drop('Acc_rate_fullterm (cm/y)', axis=1)
+#     # Make sure multiplier of mass acc is in the right units
+#     # udf['Average_Ac_cm_yr'] = udf['Accretion Rate (mm/yr)'] / 10  # mm to cm conversion
+#     # Make sure subsidence and RSLR are in correct units
+#     udf['Shallow Subsidence Rate (mm/yr)'] = udf[vertical] - udf['Surface Elevation Change Rate (cm/y)'] * 10
+#     udf['Shallow Subsidence Rate (mm/yr)'] = [0 if val < 0 else val for val in udf['Shallow Subsidence Rate (mm/yr)']]
+#     udf['SEC Rate (mm/yr)'] = udf['Surface Elevation Change Rate (cm/y)'] * 10
+#     # Now calcualte subsidence and RSLR
+#     # Make the subsidence and rslr variables: using the
+#     udf['SLR (mm/yr)'] = 2.0  # from jankowski
+#     udf['Deep Subsidence Rate (mm/yr)'] = ((3.7147 * udf['Latitude']) - 114.26) * -1
+#     udf['RSLR (mm/yr)'] = udf['Shallow Subsidence Rate (mm/yr)'] + udf['Deep Subsidence Rate (mm/yr)'] + udf[
+#         'SLR (mm/yr)']
+#     udf = udf.drop(['SLR (mm/yr)'],
+#                    axis=1)  # obviously drop because it is the same everywhere ; only used for calc
+#
+# elif vertical == 'Acc_rate_fullterm (cm/y)':
+#     udf = udf.drop('Accretion Rate (mm/yr)', axis=1)
+#     #  Make sure multiplier of mass acc is in the right units
+#     # udf['Average_Ac_cm_yr'] = udf[vertical]
+#     # Make sure subsidence and RSLR are in correct units
+#     udf['Shallow Subsidence Rate (mm/yr)'] = (udf[vertical] - udf['Surface Elevation Change Rate (cm/y)'])*10
+#     udf['SEC Rate (cm/yr)'] = udf['Surface Elevation Change Rate (cm/y)']
+#     # Now calcualte subsidence and RSLR
+#     # Make the subsidence and rslr variables: using the
+#     udf['SLR (mm/yr)'] = 2.0  # from jankowski
+#     udf['Deep Subsidence Rate (mm/yr)'] = ((3.7147 * udf['Latitude']) - 114.26) * -1
+#     udf['RSLR (mm/yr)'] = udf['Shallow Subsidence Rate (mm/yr)'] + udf['Deep Subsidence Rate (mm/yr)'] + udf[
+#         'SLR (mm/yr)']*0.1
+#     udf = udf.drop(['SLR (mm/yr)'],
+#                    axis=1)  # obviously drop because it is the same everywhere ; only used for calc
+# else:
+#     print("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
 
 ####### Define outcome as vertical component
-outcome = vertical
+outcome = 'Accretion Rate (mm/yr)'
 
-udf.to_csv("D:\\Etienne\\fall2022\\agu_data\\results\\AGU_dataset_noOutlierRm.csv")
+# udf.to_csv("D:\\Etienne\\fall2022\\agu_data\\results\\AGU_dataset_noOutlierRm.csv")
+
 # Try to semi-standardize variables
 des = udf.describe()  # just to identify which variables are way of the scale
 udf['distance_to_river_km'] = udf['distance_to_river_m']/1000  # convert to km
 udf['river_width_mean_km'] = udf['width_mean']/1000
 udf['distance_to_water_km'] = udf['Distance_to_Water_m']/1000
-udf['distance_to_ocean_km'] = udf['Distance_to_Ocean_m']/1000
+# udf['distance_to_ocean_km'] = udf['Distance_to_Ocean_m']/1000
 udf['land_lost_km2'] = udf['Land_Lost_m2']*0.000001  # convert to km2
 
 # Drop remade variables
-udf = udf.drop(['distance_to_river_m', 'width_mean', 'Distance_to_Water_m', 'Distance_to_Ocean_m',
+udf = udf.drop(['distance_to_river_m', 'width_mean', 'Distance_to_Water_m', # 'Distance_to_Ocean_m',
                 'Soil Specific Conductance (uS/cm)',
                 'Soil Porewater Specific Conductance (uS/cm)',
                 'Land_Lost_m2'], axis=1)
@@ -165,8 +172,8 @@ udf.drop(udf.index[udf['Community'] == 'Swamp'], inplace=True)
 udf = udf.drop('Basins', axis=1)
 # ----
 udf = udf.drop([  # IM BEING RISKY AND KEEP SHALLOW SUBSIDENCE RATE
-    'Surface Elevation Change Rate (cm/y)', 'Deep Subsidence Rate (mm/yr)', 'RSLR (mm/yr)', 'SEC Rate (mm/yr)',
-    'Shallow Subsidence Rate (mm/yr)',  # potentially encoding info about accretion
+    # 'Surface Elevation Change Rate (cm/y)', 'Deep Subsidence Rate (mm/yr)', 'RSLR (mm/yr)', 'SEC Rate (mm/yr)',
+    # 'Shallow Subsidence Rate (mm/yr)',  # potentially encoding info about accretion
     # taking out water level features because they are not super informative
     # Putting Human in the loop
     'Staff Gauge (ft)', 'Soil Salinity (ppt)',
@@ -178,31 +185,22 @@ udf = udf.drop([  # IM BEING RISKY AND KEEP SHALLOW SUBSIDENCE RATE
     # '10th Percentile Flood Depth when Flooded (ft)', '90th Percentile Flood Depth when Flooded (ft)',
     # other weird ones
     'Soil Porewater Temperature (°C)',
-    'Average_Marsh_Elevation (ft. NAVD88)',
+    # 'Average_Marsh_Elevation (ft. NAVD88)',
      'Organic Density (g/cm3)',  # 'Bulk Density (g/cm3)',
     'Soil Moisture Content (%)',  # 'Organic Matter (%)',  # do not use organic matter because it has a negative relationship, hard for me to interpret --> i think just picks up the bulk density relationship. Or relationship that sites with higher organic matter content tend to have less accretion
     'land_lost_km2'
 ], axis=1)
 # conduct outlier removal which drops all nans
-# rdf = funcs.informed_outlierRm(udf.drop(['Community', 'Latitude', 'Longitude', 'Bulk Density (g/cm3)',
-#                                          'Organic Matter (%)'], axis=1), thres=3, num=1)
-# rdf = funcs.informed_outlierRm(udf.drop(['Community', 'Latitude', 'Longitude', 'Bulk Density (g/cm3)',
-#                                          'Organic Matter (%)'], axis=1), thres=2, num=2)
-# rdf = funcs.informed_outlierRm(udf.drop(['Community', 'Latitude', 'Longitude',  # 'Bulk Density (g/cm3)', 'Organic Matter (%)'
-#                                          ], axis=1), thres=10, num=1)
 rdf = funcs.max_interquartile_outlierrm(udf.drop(['Community', 'Latitude', 'Longitude', 'Bulk Density (g/cm3)',
                                                   'Organic Matter (%)'], axis=1).dropna(), outcome)
-# rdf = funcs.outlierrm_outcome(udf.drop(['Community', 'Latitude', 'Longitude',  # 'Bulk Density (g/cm3)', 'Organic Matter (%)'
-#                                          ], axis=1), thres=2, target='Shallow Subsidence Rate (mm/yr)')
 # transformations (basically log transforamtions) --> the log actually kinda regularizes too
 rdf['log_distance_to_water_km'] = [np.log(val) if val > 0 else 0 for val in rdf['distance_to_water_km']]
-# rdf['log_river_width_mean_km'] = [np.log(val) if val > 0 else 0 for val in rdf['river_width_mean_km']]
 rdf['log_distance_to_river_km'] = [np.log(val) if val > 0 else 0 for val in rdf['distance_to_river_km']]
 rdf['log_distance_to_ocean_km'] = [np.log10(val) if val > 0 else 0 for val in rdf['distance_to_ocean_km']]
 # rdf['Average Height Dominant (mm)'] = rdf['Average Height Dominant (cm)'] * 10
 # rdf['Average Height Herb (mm)'] = rdf['Average Height Herb (cm)'] * 10
 # drop the old features
-rdf = rdf.drop(['distance_to_water_km', 'distance_to_river_km', 'distance_to_ocean_km'], axis=1)  # 'distance_to_ocean_km'
+rdf = rdf.drop(['distance_to_water_km', 'distance_to_river_km'], axis=1)
 
 # Rename some variables for better text wrapping
 rdf = rdf.rename(columns={
@@ -210,7 +208,7 @@ rdf = rdf.rename(columns={
     'avg_percentflooded (%)': 'Avg. Time Flooded (%)',
     'windspeed': 'Windspeed (m/s)',
 
-    'log_distance_to_ocean_km': 'Log Distance to Ocean (km)',
+    # 'log_distance_to_ocean_km': 'Log Distance to Ocean (km)',
     'log_distance_to_water_km': 'Log Distance to Water (km)',
     'log_distance_to_river_km': 'Log Distance to River (km)',
     # My flood depth vars
@@ -235,7 +233,7 @@ gdf = gdf.drop(['Std. Deviation Flood Depth (ft)', 'Avg. Flood Depth (ft)', '10t
                 '90th Percentile Flood Depth (ft)', 'Tide Amp (ft)'], axis=1)
 
 # Export gdf to file specifically for AGU data and results
-gdf.to_csv("D:\\Etienne\\fall2022\\agu_data\\results\\AGU_dataset.csv")
+# gdf.to_csv("D:\\Etienne\\fall2022\\agu_data\\results\\AGU_dataset.csv")
 # gdf = gdf.drop('distance_to_ocean_km', axis=1)  # why?
 # split into marsh datasets
 
@@ -271,34 +269,8 @@ for key in marshdic:
     # Scale: because I want feature importances
     scalar_Xmarsh = StandardScaler()
     predictors_scaled = pd.DataFrame(scalar_Xmarsh.fit_transform(phi), columns=phi.columns.values)
-    # # NOTE: I do feature selection using whole dataset because I want to know the imprtant features rather than making a generalizable model
-    # br = linear_model.BayesianRidge(fit_intercept=True)
-    #
-    # feature_selector = ExhaustiveFeatureSelector(br,
-    #                                                  min_features=1,
-    #                                                  max_features=len(phi.columns.values),
-    #                                                  # I should only use 5 features (15 takes waaaaay too long)
-    #                                                  scoring='neg_mean_absolute_error',
-    #                                                  # print_progress=True,
-    #                                                  cv=3)  # 3 fold cross-validation
-    #
-    # efsmlr = feature_selector.fit(predictors_scaled, t.values.ravel())
-    #
-    # print('Best CV r2 score: %.2f' % efsmlr.best_score_)
-    # print('Best subset (indices):', efsmlr.best_idx_)
-    # print('Best subset (corresponding names):', efsmlr.best_feature_names_)
-    #
-    # bestfeaturesM = list(efsmlr.best_feature_names_)
 
     bestfeaturesM = funcs.backward_elimination(predictors_scaled, t, num_feats=20, significance_level=0.05)
-
-    # bestfeaturesM = funcs.backward_elimination(predictors_scaled, t.values.ravel(), num_feats=100,
-    #                                            significance_level=0.01)
-
-    # Lets conduct the Bayesian Ridge Regression on this dataset: do this because we can regularize w/o cross val
-    #### NOTE: I should do separate tests to determine which split of the data is optimal ######
-    # first split data set into test train
-    from sklearn.model_selection import train_test_split, cross_val_score, RepeatedKFold
 
     X, y = predictors_scaled[bestfeaturesM], t
 
@@ -352,10 +324,10 @@ for key in hold_marsh_weights:
     sns.barplot(list(d['index']), list(d['Means']), palette=palette_ls)
     funcs.wrap_labels(ax, 10)
     fig.subplots_adjust(bottom=0.3)
-    fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\" + str(key) +
-                "_scaledX_nolog_boxplot_human.eps", format='eps',
-                dpi=300,
-                bbox_inches='tight')
+    # fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\" + str(key) +
+    #             "_scaledX_nolog_boxplot_human.eps", format='eps',
+    #             dpi=300,
+    #             bbox_inches='tight')
     plt.show()
 
 # Plot the distribution of weight parameters for the marsh runs
@@ -376,10 +348,10 @@ for key in hold_unscaled_weights:
     boxplot = sns.boxplot(data=hold_unscaled_weights[key], notch=True, showfliers=False, palette=palette_ls, width=0.4)
     funcs.wrap_labels(ax, 10)
     fig.subplots_adjust(bottom=0.3)
-    fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\" + str(
-        key) + "_unscaledWeights_nolog_boxplot_human.eps", format='eps',
-                dpi=300,
-                bbox_inches='tight')
+    # fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\" + str(
+    #     key) + "_unscaledWeights_nolog_boxplot_human.eps", format='eps',
+    #             dpi=300,
+    #             bbox_inches='tight')
     plt.show()
 
 
@@ -407,10 +379,10 @@ fig, ax = plt.subplots(figsize=(6, 4))
 ax.set_title('Distribution of Calculated Number of Well Determined Parameters')
 sns.boxplot(data=certainty_df, notch=True, showfliers=False, palette="Blues")
 funcs.wrap_labels(ax, 10)
-fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\certainty_scaledX_nolog_boxplot_human.eps",
-            format='eps',
-            dpi=300,
-            bbox_inches='tight')
+# fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\certainty_scaledX_nolog_boxplot_human.eps",
+#             format='eps',
+#             dpi=300,
+#             bbox_inches='tight')
 plt.show()
 
 
@@ -424,9 +396,9 @@ ax.set_title('Distribution of Intercepts [Unscaled]:')
 ax.axhline(0, ls='--')
 sns.boxplot(data=intercept_df, notch=True, showfliers=False, palette="coolwarm")
 funcs.wrap_labels(ax, 10)
-fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\intercepts_nolog_boxplot_human.eps", dpi=300,
-            format='eps',
-            bbox_inches='tight')
+# fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\intercepts_nolog_boxplot_human.eps", dpi=300,
+#             format='eps',
+#             bbox_inches='tight')
 plt.show()
 
 
@@ -439,10 +411,8 @@ fig, ax = plt.subplots(figsize=(6, 4))
 ax.set_title('Distribution of Bayesian Uncertainty in Predictions')
 sns.boxplot(data=pred_certainty_df, notch=True, showfliers=False, palette="Reds")
 funcs.wrap_labels(ax, 10)
-fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\pred_certainty_scaledX_nolog_boxplot_human.eps",
-            dpi=300, format='eps',
-            bbox_inches='tight')
+# fig.savefig("D:\\Etienne\\PAPER_2023\\results_BLR\\pred_certainty_scaledX_nolog_boxplot_human.eps",
+#             dpi=300, format='eps',
+#             bbox_inches='tight')
 plt.show()
 
-# Following https://christophm.github.io/interpretable-ml-book/limo.html for individual feature importances
-# Want to show points for the 10th, 25th, 50th, 75th, 90th poins of outcome and their feature effects
