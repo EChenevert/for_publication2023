@@ -1,5 +1,9 @@
 import numpy as np
 import pandas as pd
+import urllib.request
+from zipfile import ZipFile
+from io import StringIO
+from io import BytesIO
 
 # Functions used to load data
 def organized_iteryears(date_col_name, df):
@@ -57,49 +61,6 @@ def add_accretionRate(accdf):
     return accdf
 
 
-# def add_secRate(accdf):
-#
-#     # THIS DONT WORK!!! I cannot jus go thru and substract cuz there is a switch bertween sites which will fuck thingS!!
-#
-#     # accdf['Verified Pin Height (mm)'] = (accdf['Accretion Measurement 1 (mm)'] + accdf['Accretion Measurement 2 (mm)'] +
-#     #                                    accdf['Accretion Measurement 3 (mm)'] +
-#     #                                    accdf['Accretion Measurement 4 (mm)']) / 4
-#
-#     accdf['Sample Date (mm/dd/yyyy)'] = pd.to_datetime(accdf['Sample Date (mm/dd/yyyy)'],
-#                                                        format='%m/%d/%Y')
-#
-#     accdf['Establishment Date (mm/dd/yyyy)'] = pd.to_datetime(accdf['Establishment Date (mm/dd/yyyy)'],
-#                                                               format='%m/%d/%Y')
-#
-#     accdf['Delta time (days)'] = accdf['Sample Date (mm/dd/yyyy)'] - \
-#                                  accdf['Establishment Date (mm/dd/yyyy)']
-#
-#     accdf['Delta time (days)'] = accdf['Delta time (days)'].dt.days
-#     accdf['Delta Time (decimal_years)'] = accdf['Delta time (days)'] / 365
-#     accdf['surface difference'] = accdf['Verified Pin Height (mm)']
-#     accdf['surface difference'][0] = 0.0
-#     for i in range(1, len(accdf['surface difference'])):
-#         accdf['surface difference'][i] = accdf['surface difference'][i] - accdf['surface difference'][i-1]
-#     # accdf['SEC Rate (mm/yr)'] = accdf['surface difference'] / accdf['Delta Time (decimal_years)']
-#
-#
-#     # # Try with the numpy
-#     # surfdiffarr = np.asarray(accdf['surface difference'])
-#     # for i in range(1, len(surfdiffarr)):
-#     #     surfdiffarr[i] = surfdiffarr[i] - surfdiffarr[i-1]
-#     # accdf['surface difference'] = surfdiffarr
-#     # accdf['SEC Rate (mm/yr)'] = accdf['surface difference'] / accdf['Delta Time (decimal_years)']
-#
-#
-#     return accdf
-
-
-def sum_accretion(accdf):
-    """Will sum accretion rates over the time interval represented by the data ''
-    MAYBE THIS CAN JUS BE BETTER DONE BY A GROUPBY FUNCTION"""
-
-
-
 def convert_str(string):
     '''Converts a string into a list'''
     ls = list(string.split(', '))
@@ -110,60 +71,81 @@ def load_data():
 
     '''This loads all the crms data currently in the data folder of this package'''
 
-    soil_properties = pd.read_csv(r"D:\Etienne\summer2022_CRMS\run_experiments\CRMS_Soil_Properties\CRMS_Soil_Properties.csv", encoding='unicode escape')
-    # hourly_hydro = pd.read_csv(r"C:\Users\etachen\Documents\PyCharmProjs\datasetsCRMS\main\data\CRMS_Continuous_Hydrographic.csv", encoding='unicode escape')
-    monthly_hydro = pd.read_csv(r"D:\Etienne\summer2022_CRMS\run_experiments\CRMS_Discrete_Hydrographic\CRMS_Discrete_Hydrographic.csv", encoding='unicode escape')
-    marsh_vegetation = pd.read_csv(r"D:\Etienne\summer2022_CRMS\run_experiments\CRMS_Marsh_Vegetation\CRMS_Marsh_Vegetation.csv", encoding='unicode escape')
-    forest_vegetation = pd.read_csv(r"D:\Etienne\summer2022_CRMS\run_experiments\CRMS_Forest_Vegetation\CRMS_Forest_Vegetation.csv", encoding='unicode escape')
-    accretion = pd.read_csv(r"D:\Etienne\summer2022_CRMS\run_experiments\CRMS_Accretion\CRMS_Accretion.csv", encoding='unicode escape')
-    biomass = pd.read_csv(r"D:\Etienne\summer2022_CRMS\run_experiments\CRMS_Biomass\CRMS_Biomass.csv", encoding='unicode escape')
-    surface_elevation = pd.read_csv(r"D:\Etienne\summer2022_CRMS\run_experiments\CRMS_Surface_Elevation\CRMS_Surface_Elevation.csv", encoding='unicode escape')
+    url_soil = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/CRMS_Soil_Properties.csv"
+    soil_properties = pd.read_csv(url_soil, encoding='unicode escape')
+    # Monthly Hydrographic
+    url_monthly_hydro = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/CRMS_Discrete_Hydrographic.csv"
+    monthly_hydro = pd.read_csv(url_monthly_hydro, encoding='unicode escape')
+
+
+    # Marsh Vegetation
+    url_marsh_veg = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/CRMS_Marsh_Vegetation.csv"
+    marsh_vegetation = pd.read_csv(url_marsh_veg, encoding='unicode escape')
+
+    # link_marsh_veg = "https://github.com/EChenevert/for_publication2023/blob/0ce48c9910469b9773872da9b71c10788d78d175/CRMS_Marsh_Vegetation_compressed.csv.zip"
+    # url_marsh_veg = urllib.request.urlopen(link_marsh_veg)
+    # # url_marsh_veg = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/CRMS_Marsh_Vegetation_compressed.csv.zip"
+    # with ZipFile(BytesIO(url_marsh_veg.read())) as my_zip_file:
+    #     for contained_file in my_zip_file.namelist():
+    #         fzip = my_zip_file.open(contained_file)
+    #         data = fzip.read()
+    # # Convert bytes data to string data
+    # s = str(data, 'utf-8')
+    # data = StringIO(s)
+    # # convert it to pandas DataFrame as normal csv file
+    # marsh_vegetation = pd.read_csv(data)
+
+
+    # Accretion
+    url_accretion = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/CRMS_Accretion.csv"
+    accretion = pd.read_csv(url_accretion, encoding='unicode escape')
+    # # Biomass
+    # url_bio = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/CRMS_Biomass.csv"
+    # biomass = pd.read_csv(url_bio, encoding='unicode escape')
+
+    # surface_elevation = pd.read_csv(r"D:\Etienne\summer2022_CRMS\run_experiments\CRMS_Surface_Elevation\CRMS_Surface_Elevation.csv", encoding='unicode escape')
 
     dfs = [
         accretion,
         soil_properties,
-        # hourly_hydro,
-        monthly_hydro,
+        # monthly_hydro,
         marsh_vegetation,
-        # forest_vegetation,
-        # biomass,
-        surface_elevation
     ]
     # Making a common column for dtermining the site name
-    for d in range(len(dfs)):
+    for d in dfs:
         # if 'Station_ID' in dfs[d].columns:
         #     dfs[d]['Simple site'] = [i[:8] for i in dfs[d]['Station_ID']]
-        if 'Station ID' in dfs[d].columns:  # For surface Elevation, soil Properties, marsh vegetation, accretion
-            dfs[d]['Simple site'] = [i[:8] for i in dfs[d]['Station ID']]
-        if 'CPRA Station ID' in dfs[d].columns:  # For Monthly hydro,
-            dfs[d]['Simple site'] = [i[:8] for i in dfs[d]['CPRA Station ID']]
+        if 'Station ID' in d.columns:  # For surface Elevation, soil Properties, marsh vegetation, accretion
+            d['Simple site'] = [i[:8] for i in d['Station ID']]
+        if 'CPRA Station ID' in d.columns:  # For Monthly hydro,
+            d['Simple site'] = [i[:8] for i in d['CPRA Station ID']]
 
         # Setting the YEARLY dates
         # if 'calendar_year' in dfs[d].columns:
         #     dfs[d]['Year (yyyy)'] = dfs[d]['calendar_year']
-        if 'Sample Date (mm/dd/yyyy)' in dfs[d].columns:  # Accretion, soil properties, surface elevation
-            dfs[d]['Year (yyyy)'] = organized_iteryears('Sample Date (mm/dd/yyyy)', dfs[d])
-        if 'Date (mm/dd/yyyy)' in dfs[d].columns:  # Monthly Hydro,
-            dfs[d]['Year (yyyy)'] = organized_iteryears('Date (mm/dd/yyyy)', dfs[d])
-        if 'Collection Date (mm/dd/yyyy)' in dfs[d].columns:  # Marsh Veg,
-            dfs[d]['Year (yyyy)'] = organized_iteryears('Collection Date (mm/dd/yyyy)', dfs[d])
+        if 'Sample Date (mm/dd/yyyy)' in d.columns:  # Accretion, soil properties, surface elevation
+            d['Year (yyyy)'] = organized_iteryears('Sample Date (mm/dd/yyyy)', d)
+        if 'Date (mm/dd/yyyy)' in d.columns:  # Monthly Hydro,
+            d['Year (yyyy)'] = organized_iteryears('Date (mm/dd/yyyy)', d)
+        if 'Collection Date (mm/dd/yyyy)' in d.columns:  # Marsh Veg,
+            d['Year (yyyy)'] = organized_iteryears('Collection Date (mm/dd/yyyy)', d)
 
         # # Set the MONTHLY dates
         # if 'calendar_year' in dfs[d].columns:
         #     dfs[d]['Month (mm)'] = 0  # this means that this data is averaged over a length of years so there is no monthly data
-        if 'Sample Date (mm/dd/yyyy)' in dfs[d].columns:  # Accretion, soil properties, surface elevation
-            dfs[d]['Month (mm)'] = organized_itermons('Sample Date (mm/dd/yyyy)', dfs[d])
-        if 'Date (mm/dd/yyyy)' in dfs[d].columns:  # Monthly Hydro,
-            dfs[d]['Month (mm)'] = organized_itermons('Date (mm/dd/yyyy)', dfs[d])
-        if 'Collection Date (mm/dd/yyyy)' in dfs[d].columns:  # Marsh Veg,
-            dfs[d]['Month (mm)'] = organized_itermons('Collection Date (mm/dd/yyyy)', dfs[d])
+        if 'Sample Date (mm/dd/yyyy)' in d.columns:  # Accretion, soil properties, surface elevation
+            d['Month (mm)'] = organized_itermons('Sample Date (mm/dd/yyyy)', d)
+        if 'Date (mm/dd/yyyy)' in d.columns:  # Monthly Hydro,
+            d['Month (mm)'] = organized_itermons('Date (mm/dd/yyyy)', d)
+        if 'Collection Date (mm/dd/yyyy)' in d.columns:  # Marsh Veg,
+            d['Month (mm)'] = organized_itermons('Collection Date (mm/dd/yyyy)', d)
 
 
         # Add basins: I manually put each site into a basin category, this was done from the CRMS louisiana website map
-        dfs[d]['Basins'] = np.arange(len(dfs[d]['Simple site']))  # this is for appending a basins variable
+        d['Basins'] = np.arange(len(d['Simple site']))  # this is for appending a basins variable
 
-        if 'Accretion Measurement 1 (mm)' in dfs[d].columns:
-            dfs[d] = add_accretionRate(dfs[d])
+        if 'Accretion Measurement 1 (mm)' in d.columns:
+            d = add_accretionRate(d)
         # if 'Verified Pin Height (mm)' in dfs[d].columns:
         #     dfs[d] = add_secRate(dfs[d])
 
@@ -187,16 +169,16 @@ def load_data():
             'CRMS0065, CRMS5167, CRMS0008, CRMS0038, CRMS5845, CRMS0039, CRMS0046, CRMS5452, CRMS5267, CRMS0061, CRMS0097, CRMS5373, CRMS0063, CRMS5414, CRMS5255, CRMS0089, CRMS0090, CRMS0058, CRMS0059, CRMS0047, CRMS3913, CRMS0056, CRMS0033, CRMS0034, CRMS0030, CRMS2830, CRMS6299, CRMS6209, CRMS0103, CRMS4094, CRMS2854, CRMS0006, CRMS3667, CRMS4107, CRMS3626, CRMS3650, CRMS0002, CRMS4406, CRMS4407, CRMS3784, CRMS3639, CRMS3641, CRMS3664, CRMS3800, CRMS4548, CRMS4551, CRMS4557, CRMS1024, CRMS0108, CRMS4572, CRMS4596, CRMS0003, CRMS1069')
         Unammed_basin = convert_str('CRMS4110, CRMS0035, CRMS6088, CRMS6090, CRMS0086')
 
-        dfs[d] = add_basins(dfs[d], 'Calcasieu_Sabine', Calcasieu_Sabine)
-        dfs[d] = add_basins(dfs[d], 'Mermentau', Mermentau)
-        dfs[d] = add_basins(dfs[d], 'Teche_Vermillion', Teche_Vermillion)
-        dfs[d] = add_basins(dfs[d], 'Atchafalaya', Atchafalaya)
-        dfs[d] = add_basins(dfs[d], 'Terrebonne', Terrebonne)
-        dfs[d] = add_basins(dfs[d], 'Barataria', Barataria)
-        dfs[d] = add_basins(dfs[d], 'MRD', MRD)
-        dfs[d] = add_basins(dfs[d], 'Brenton Sound', BrentonS)
-        dfs[d] = add_basins(dfs[d], 'Ponchartrain', Ponchartrain)
-        dfs[d] = add_basins(dfs[d], 'Unammed_basin', Unammed_basin)
+        d = add_basins(d, 'Calcasieu_Sabine', Calcasieu_Sabine)
+        d = add_basins(d, 'Mermentau', Mermentau)
+        d = add_basins(d, 'Teche_Vermillion', Teche_Vermillion)
+        d = add_basins(d, 'Atchafalaya', Atchafalaya)
+        d = add_basins(d, 'Terrebonne', Terrebonne)
+        d = add_basins(d, 'Barataria', Barataria)
+        d = add_basins(d, 'MRD', MRD)
+        d = add_basins(d, 'Brenton Sound', BrentonS)
+        d = add_basins(d, 'Ponchartrain', Ponchartrain)
+        d = add_basins(d, 'Unammed_basin', Unammed_basin)
 
     return dfs  # Will be a list containing the crms datasets
 
