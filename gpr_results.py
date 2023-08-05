@@ -266,7 +266,7 @@ import shap
 X = X.rename(columns={'Tidal Amplitude (cm)': 'Tidal Amplitude (*)',
                       'NDVI': 'NDVI (*)',
                       '90th Percentile Flood Depth (cm)': '90th Percentile Flood Depth (*)',
-                      'TSS (mg/l)': 'TSS (*)',
+                      'TSS (mg/L)': 'TSS (*)',
                       'Soil Porewater Salinity (ppt)': 'Soil Porewater Salinity (*)'})
 # Sampling and shap computation for explanation
 gpr.fit(X, target)
