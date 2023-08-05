@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import os
 
 
 # Functions used to load data

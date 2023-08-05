@@ -2,16 +2,12 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import DotProduct, WhiteKernel
 import matplotlib.pyplot as plt
 from sklearn.metrics import r2_score, mean_absolute_error
-
 from sklearn.preprocessing import StandardScaler
-
 import main
 import pandas as pd
 import numpy as np
 import funcs
-from sklearn.model_selection import train_test_split, cross_val_score, RepeatedKFold, GridSearchCV, cross_val_predict, \
-    cross_validate, KFold
-
+from sklearn.model_selection import KFold, cross_val_predict
 
 # Everything I need for this should be within the file "D:\Etienne\fall2022\agu_data"
 ## Data from CIMS
@@ -128,7 +124,6 @@ rdf = rdf.rename(columns={
     'Tide_Amp (ft)': 'Tide Amp (ft)',
     'avg_percentflooded (%)': 'Avg. Time Flooded (%)',
     'windspeed': 'Windspeed (m/s)',
-    # 'log_distance_to_ocean_km': 'Log Distance to Ocean (km)',
     'log_distance_to_water_km': 'Log Distance to Water (km)',
     'log_distance_to_river_km': 'Log Distance to River (km)',
     # My flood depth vars
@@ -148,12 +143,8 @@ gdf['Avg. Flood Depth (cm)'] = gdf['Avg. Flood Depth (ft)'] * 30.48
 gdf['Std. Deviation Flood Depth (cm)'] = gdf['Std. Deviation Flood Depth (ft)'] * 30.48
 
 # Delete the old non SI unit variables
-# gdf = gdf.drop(['Std. Deviation Flood Depth (ft)', 'Avg. Flood Depth (ft)', 'Tide Amp (ft)'], axis=1)
 gdf = gdf.drop(['Std. Deviation Flood Depth (ft)', 'Avg. Flood Depth (ft)', '10th Percentile Flood Depth (ft)',
                 '90th Percentile Flood Depth (ft)', 'Tide Amp (ft)'], axis=1)
-
-# # ------------------------ Check if i get rid of 0 TSS values ---------------------------------------------
-# gdf = gdf[gdf['TSS (mg/l)'] != 0]
 
 ### --- Begin the GPR regression --- ###
 
@@ -195,7 +186,6 @@ for i in range(100):  # for 100 repeats
         y_train, y_test = target.iloc[train_index], target.iloc[test_index]
         # Fit the model
         kernel = (DotProduct() ** 2) + WhiteKernel()
-        # kernel = DotProduct() + RBF()
         gpr = GaussianProcessRegressor(kernel=kernel, n_restarts_optimizer=10, random_state=0, alpha=0.5)
 
         gpr.fit(np.asarray(X_train), np.asarray(y_train))
@@ -467,7 +457,6 @@ tide50 = get_percentile(0.5, shap_values.data[:, 0])[0]
 tide25 = get_percentile(0.25, shap_values.data[:, 0])[0]
 tide10 = get_percentile(0.1, shap_values.data[:, 0])[0]
 
-# plt.figure(figsize=(10, 15))
 plt.figure()
 shap.plots.waterfall(shap_values[tide90], show=False)
 ax = plt.gca()

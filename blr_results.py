@@ -1,20 +1,11 @@
-from mlxtend.feature_selection import ExhaustiveFeatureSelector
 from sklearn import linear_model
-
 import matplotlib.pyplot as plt
-from sklearn.metrics import r2_score, mean_absolute_error
-from random import seed
-
 from sklearn.preprocessing import StandardScaler
-
 import main
 import pandas as pd
 import numpy as np
 import funcs
-from sklearn.model_selection import train_test_split, cross_val_score, RepeatedKFold, GridSearchCV, cross_val_predict, \
-    cross_validate, KFold
 import seaborn as sns
-import matplotlib
 
 
 # Everything I need for this should be within the file "D:\Etienne\fall2022\agu_data"

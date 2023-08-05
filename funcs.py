@@ -1,11 +1,8 @@
 import pandas as pd
 from matplotlib import pyplot as plt
-from scipy import stats
 import numpy as np
 from sklearn.metrics import r2_score, mean_absolute_error
-from sklearn.model_selection import KFold, cross_validate, cross_val_predict
-from sklearn.utils import shuffle
-import random
+from sklearn.model_selection import KFold, cross_val_predict
 import statsmodels.api as sm
 from sklearn import linear_model
 import textwrap
