@@ -2,33 +2,59 @@ import numpy as np
 import pandas as pd
 import os
 
-# Functions used to load data
-def read_data_file(filename):
-    current_dir = os.path.dirname(__file__)
-    # data_dir = os.path.join(current_dir, 'data')
-    file_path = os.path.join(current_dir, filename)
-    return file_path
 
+# Functions used to load data
 def organized_iteryears(date_col_name, df, given):
-    ''' This method creates a data column that indicates what year the sample
-    (or data) was collected or observed '''
+    """ This method creates a data column that indicates what year the sample
+    (or data) was collected or observed.
+
+    @params:
+        date_col_name (str): The name of the column containing the date data.
+        df (DataFrame): The DataFrame containing the date column.
+        given (str): The date format of the 'date_col_name' column.
+
+    @returns:
+        pandas.Series: A new Series containing the year for each date in the 'date_col_name' column.
+    """
     datetimeArr = pd.to_datetime(df[date_col_name], format=given)
     years = datetimeArr.dt.year
     return years
 
 
 def organized_itermons(date_col_name, df, given):
-    '''This is an iterdates method for the hydro data, which is logged into
-    the csv more cleaning. This increases speed
+    """
+    Extracts the month information from a date column in a DataFrame and creates a new Series.
+
+    This function is designed to process a date column in a DataFrame and extract the month component
+    from each date, creating a new Series containing the corresponding month values. The resulting Series
+    can be used if the investigator is interested in monthly values of data.
+
     @params:
-        date_col_names = is the name of the date column
-        df = is the dataframe the date column is in'''
+        date_col_name (str): The name of the column containing the date data.
+        df (DataFrame): The DataFrame containing the date column.
+        given (str): The date format of the 'date_col_name' column.
+
+    @returns:
+        pandas.Series: A new Series containing the month for each date in the 'date_col_name' column.
+    """
     datetimeArr = pd.to_datetime(df[date_col_name], format=given)
     months = datetimeArr.dt.month
     return months
 
 
 def add_basins(df, basin_str, ls_crms):
+    """
+    Adds the hydrologic basin in which individual CRMS stations are in.
+
+    @params:
+        df (DataFrame): The DataFrame to which the basin information will be added.
+        basin_str (str): The basin information to be added to the DataFrame.
+        ls_crms (list): List of CRM values to identify the rows that belong to the basin.
+
+    @returns:
+        DataFrame: The updated DataFrame with the 'Basins' column containing the basin information.
+    """
+
     for i in range(len(ls_crms)):
         indices = [k for k, x in enumerate(df['Simple site']) if x == ls_crms[i]]
         for j in range(len(indices)):
@@ -36,15 +62,25 @@ def add_basins(df, basin_str, ls_crms):
     return df
 
 
-def add_avgAccretion(accdf):
-    avg_accretion = (accdf['Accretion Measurement 1 (mm)'] + accdf['Accretion Measurement 2 (mm)'] +
-                     accdf['Accretion Measurement 3 (mm)'] + accdf['Accretion Measurement 4 (mm)']) / 4
-    avg_accretion = pd.DataFrame(avg_accretion, columns=['Average Accretion (mm)'], index=accdf.index.values)
-    newdf = pd.concat([accdf, avg_accretion], axis=1)
-    return newdf
+# def add_avgAccretion(accdf):
+#     avg_accretion = (accdf['Accretion Measurement 1 (mm)'] + accdf['Accretion Measurement 2 (mm)'] +
+#                      accdf['Accretion Measurement 3 (mm)'] + accdf['Accretion Measurement 4 (mm)']) / 4
+#     avg_accretion = pd.DataFrame(avg_accretion, columns=['Average Accretion (mm)'], index=accdf.index.values)
+#     newdf = pd.concat([accdf, avg_accretion], axis=1)
+#     return newdf
 
 
 def add_accretionRate(accdf):
+    """
+    Adds columns with accretion rates for each CRMS station. These are calculated by averaging the four accretion measurements
+    then dividing the height of accreted sediment by the time, in decimal years, between sampling intervals.
+
+    @params:
+        accdf (DataFrame): The DataFrame containing the accretion data.
+
+    @returns:
+        DataFrame: The updated DataFrame with the accretion rate-related columns.
+    """
     accdf['Average Accretion (mm)'] = (accdf['Accretion Measurement 1 (mm)'] + accdf['Accretion Measurement 2 (mm)'] +
                                        accdf['Accretion Measurement 3 (mm)'] +
                                        accdf['Accretion Measurement 4 (mm)']) / 4
@@ -65,14 +101,34 @@ def add_accretionRate(accdf):
 
 
 def convert_str(string):
-    '''Converts a string into a list'''
+    """Converts a string into a list
+
+    @params:
+        string: a string separated by commas
+    @returns:
+        ls: a list.
+    """
     ls = list(string.split(', '))
     return ls
 
 
 def load_data():
+    """This function loads relevant CRMS (Coastwide Reference Monitoring System) data currently in the GitHub repository
+    for this study.
 
-    '''This loads all the crms data currently in the data folder of this package'''
+    The function retrieves various datasets related to CRMS from public GitHub repositories. It loads four CSV files
+    from the specified URLs, representing different types of CRMS data:
+    - Soil properties
+    - Monthly hydrographic data
+    - Marsh vegetation data
+    - Accretion data
+
+    For each dataset, the function performs data processing tasks such as organizing date-related columns, adding
+    calculated columns (e.g., accretion rate), and assigning hydrologic basin categories to sites.
+
+    @returns:
+        list: A list containing the loaded CRMS datasets in the form of pandas DataFrames.
+    """
 
     url_soil = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/CRMS_Soil_Properties.csv"
     soil_properties = pd.read_csv(url_soil, encoding='unicode escape')
@@ -117,7 +173,6 @@ def load_data():
         if 'Collection Date (mm/dd/yyyy)' in d.columns:  # Marsh Veg,
             d['Month (mm)'] = organized_itermons('Collection Date (mm/dd/yyyy)', d, '%m/%d/%y')
 
-
         # Add basins: I manually put each site into a basin category, this was done from the CRMS louisiana website map
         d['Basins'] = np.arange(len(d['Simple site']))  # this is for appending a basins variable
 
@@ -161,61 +216,69 @@ def load_data():
 # The above lines od code above just make the dataframes within the list comparable
 # Below I now create functions that manipulate the datasets from the dfs list
 def combine_dataframes(dfs):
-    ''' this function will take the dataframes and concatenate them (stack them) based on
-    their index
-    NOTE: Test this again after doing the groupby functions.
-    The index and concatenation may be slighly off'''
+    """This function will take the dataframes and concatenate them (stack them) based on
+    their index.
+
+    @params:
+        dfs: List of dataframes pertaining to different CRMS datasets.
+    @returns:
+        full_df: one dataset of the merged datasets.
+    """
     i = dfs[0].index.to_flat_index()
     print(i)
     dfs[0].index = i
     full_df = dfs[0]
     for j in range(1, len(dfs)):  # always make sure this is the correct range length.... its confusing me
-        # full_df = pd.concat([full_df, dfs[j]], axis=1, ignore_index=False).drop_duplicates()
         idx = dfs[j].index.to_flat_index()
         dfs[j].index = idx
         full_df = pd.concat([full_df, dfs[j]], join='outer', axis=1)
-        # full_df = full_df.join(dfs[j], how={'left', 'outer'})
         full_df = full_df.loc[:, ~full_df.columns.duplicated()]
     return full_df
 
 
 def average_bysite(dfs):
-    '''Below is a df that is craeted by averaging across all years per crms site.
-    NOTE: That varaibles constructed by strings are annihilated (due to the .median()command)'''
+    """Below is a df that is created by averaging across all years per CRMS site.
+
+    @params:
+        dfs: a list of dataframes
+    @returns:
+        full_df: a merged dataset of all dataframes that is averaged temporally over the 17 years of the study for each
+        CRMS station.
+    """
     for n in range(len(dfs)):
         df = dfs[n].groupby(['Simple site']).median()
         basins = dfs[n].groupby(['Simple site'])['Basins'].agg(pd.Series.mode).to_frame()
-        # dfs[n] = pd.concat([df, basins], axis=1)
-        # weird thing i decided to do spontaneously, prob can implement better to include more categorical variables
         if 'Community' in dfs[n].columns:
             community = dfs[n].groupby(['Simple site'])['Community'].agg(pd.Series.mode).to_frame()
-            # dfs[n] = pd.concat([df, community], axis=1)
             dfs[n] = pd.concat([df, basins, community], axis=1)
-
         else:
             dfs[n] = pd.concat([df, basins], axis=1)
-
     full_df = combine_dataframes(dfs)
     return full_df
 
 
 def average_byyear_bysite_seasonal(dfs):
-    '''This will create a dataframe that incorporates data from the 17 years and each season of collection
-    It can also take byyear_bymonth,bysite'''
+    """This will create a dataframe that incorporates data for each CRMS site, for each season, and for each of the 17
+    years of the study period. from the 17 years and each season of collection.
+
+    @params:
+        dfs: a list of dataframes
+    @returns:
+        full_df: a merged dataset of all CRMS dataframes with minimal averaging. All data is separated by CRMS station,
+        season, and year.
+    """
     for n in range(len(dfs)):
         dfs[n]['Season'] = [1 if i > 4 and i <= 10 else 2 for i in dfs[n]['Month (mm)']]
         df = dfs[n].groupby(['Simple site', 'Year (yyyy)', 'Season']).median()  # Excludes extreme events
         basins = dfs[n].groupby(['Simple site', 'Year (yyyy)', 'Season'])['Basins'].agg(pd.Series.mode).to_frame()
         # weird thing i decided to do spontaneously, prob can implement better to include more categorical variables
         if 'Community' in dfs[n].columns:
-            community = dfs[n].groupby(['Simple site', 'Year (yyyy)', 'Season'])['Community'].agg(pd.Series.mode).to_frame()
+            community = dfs[n].groupby(['Simple site', 'Year (yyyy)', 'Season'])['Community'].agg(
+                pd.Series.mode).to_frame()
             dfs[n] = pd.concat([df, basins, community], axis=1)
         else:
             dfs[n] = pd.concat([df, basins], axis=1)
     full_df = combine_dataframes(dfs)
-    full_df = full_df.reset_index().rename(columns={'level_0':'Simple site', 'level_1':'Year (yyyy)', 'level_2':'Season'})
-
+    full_df = full_df.reset_index().rename(
+        columns={'level_0': 'Simple site', 'level_1': 'Year (yyyy)', 'level_2': 'Season'})
     return full_df
-
-
-
