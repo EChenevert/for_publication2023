@@ -1,10 +1,6 @@
 import numpy as np
 import pandas as pd
 import os
-import urllib.request
-from zipfile import ZipFile
-from io import StringIO
-from io import BytesIO
 
 # Functions used to load data
 def read_data_file(filename):
@@ -89,14 +85,6 @@ def load_data():
     # Accretion
     url_accretion = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/CRMS_Accretion.csv"
     accretion = pd.read_csv(url_accretion, encoding='unicode escape')
-    # # # Biomass
-    # # url_bio = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/CRMS_Biomass.csv"
-    # # biomass = pd.read_csv(url_bio, encoding='unicode escape')
-
-    # # Trying through directory
-    # soil_properties = pd.read_csv(read_data_file("CRMS_Soil_Properties.csv"), encoding="unicode_escape")
-    # accretion = pd.read_csv(read_data_file("CRMS_Accretion.csv"), encoding="unicode_escape")
-    # marsh_vegetation = pd.read_csv(read_data_file("CRMS_Marsh_Vegetation.csv"), encoding="unicode_escape")
 
     dfs = [
         accretion,
@@ -114,8 +102,6 @@ def load_data():
             d['Simple site'] = [i[:8] for i in d['CPRA Station ID']]
 
         # Setting the YEARLY dates
-        # if 'calendar_year' in dfs[d].columns:
-        #     dfs[d]['Year (yyyy)'] = dfs[d]['calendar_year']
         if 'Sample Date (mm/dd/yyyy)' in d.columns:  # Accretion, soil properties, surface elevation
             d['Year (yyyy)'] = organized_iteryears('Sample Date (mm/dd/yyyy)', d, '%m/%d/%Y')
         if 'Date (mm/dd/yyyy)' in d.columns:  # Monthly Hydro,
@@ -124,8 +110,6 @@ def load_data():
             d['Year (yyyy)'] = organized_iteryears('Collection Date (mm/dd/yyyy)', d, '%m/%d/%y')
 
         # # Set the MONTHLY dates
-        # if 'calendar_year' in dfs[d].columns:
-        #     dfs[d]['Month (mm)'] = 0  # this means that this data is averaged over a length of years so there is no monthly data
         if 'Sample Date (mm/dd/yyyy)' in d.columns:  # Accretion, soil properties, surface elevation
             d['Month (mm)'] = organized_itermons('Sample Date (mm/dd/yyyy)', d, '%m/%d/%Y')
         if 'Date (mm/dd/yyyy)' in d.columns:  # Monthly Hydro,
@@ -139,8 +123,6 @@ def load_data():
 
         if 'Accretion Measurement 1 (mm)' in d.columns:
             d = add_accretionRate(d)
-        # if 'Verified Pin Height (mm)' in dfs[d].columns:
-        #     dfs[d] = add_secRate(dfs[d])
 
         Calcasieu_Sabine = convert_str(
             'CRMS0684, CRMS2189, CRMS0669, CRMS1838, CRMS0665, CRMS2166, CRMS0663, CRMS0662, CRMS2156, CRMS2154, CRMS0697, CRMS0660, CRMS0683, CRMS0661, CRMS2219, CRMS0658, CRMS0693, CRMS0682, CRMS1205, CRMS0651, CRMS0694, CRMS0677, CRMS0680, CRMS1858, CRMS0638, CRMS2334, CRMS0641, CRMS0651, CRMS0635, CRMS0639, CRMS0642, CRMS0647, CRMS6302, CRMS6301, CRMS0685, CRMS0672, CRMS0655, CRMS0687, CRMS0656, CRMS0644, CRMS1743, CRMS1738, CRMS0645, CRMS2418, CRMS0648, CRMS0650, CRMS0691')
