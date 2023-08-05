@@ -5,21 +5,12 @@ import scipy
 import seaborn as sns
 from sklearn.metrics import r2_score
 
+
+# This is the code used to create visualizations of the data. All file paths below are for my local computer, therefore,
+# users who downloaded this from GitHub will not be able to see these.
+
 df = pd.read_csv(r"D:\\Etienne\\fall2022\\agu_data\\results\\AGU_dataset.csv", encoding='unicode_escape')
 
-# Main points to prove
-# 1. Tidal Amp is important even in a microtidal regime; likely gives us an idea of oceanic influence
-# 2. NDVI is only a predictive variable when it is negatively related to accretion; (Show whole plot and fresh v saline)
-#    - Show against organic matter % maybe
-# 3. Investigate TSS; particularly why it is not important in saline marshes!
-# 4. Maybe show salinity with organic matter % variable
-# 5. Potentially the histogram of Time inundated variable
-
-
-# Using matplot lib to have more control
-# # Part 1. Show Tidal Amp is important.
-# # Show that bulk density and accretion increases with tidal amp; some sort of oceanic influence on accretion and
-# # mineral sediment
 plt.rcParams.update({'font.size': 16})
 
 tides = np.asarray(df['Tidal Amplitude (cm)'])

@@ -1,15 +1,9 @@
 from mlxtend.feature_selection import ExhaustiveFeatureSelector
-from sklearn import linear_model
-
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import DotProduct, WhiteKernel
-
 import matplotlib.pyplot as plt
 from sklearn.metrics import r2_score, mean_absolute_error
-from random import seed
-
 from sklearn.preprocessing import StandardScaler
-
 import main
 import pandas as pd
 import numpy as np
