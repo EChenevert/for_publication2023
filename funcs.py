@@ -12,74 +12,46 @@ import textwrap
 
 
 def max_interquartile_outlierrm(df, target):
+    """This function removes outliers from a DataFrame based on the maximum interquartile range (IQR).
+
+    Outliers are identified as data points that fall above the upper boundary defined as Q3 + 1.5 * IQR, where
+    Q3 is the third quartile and IQR is the interquartile range (the difference between Q3 and Q1).
+
+    @params:
+        df (DataFrame): The DataFrame from which outliers will be removed.
+        target (str): The name of the target column for which outliers will be identified and removed.
+        In our study it is accretion rate.
+    @returns:
+        DataFrame: A new DataFrame with outliers removed based on the specified target column.
+    """
     Q1 = df[target].quantile(0.25)
     Q3 = df[target].quantile(0.75)
     IQR = Q3 - Q1
-
-    # filtered_df = df[~((df[target] < (Q1 - 1.5*IQR)) | (df[target] > (Q3 + 1.5*IQR)))]
     filtered_df = df[~(df[target] > (Q3 + 1.5 * IQR))]
     return filtered_df
 
 
-def outlierrm(df, thres=3):
-    """Dont put in long lats in here! Need Year and Site name lol"""
-    df = df.dropna()  #.set_index(['Simple site', 'level_1'])
-    # print(df.columns.values, len(df.columns.values), len(df))
-    # switch = False
-    # if 'Basins' in df.columns.values or 'Community' in df.columns.values:
-    #     print('True')
-    #     switch = True
-    #     holdstrings = df[['Basins', 'Community']]
-    #     df = df.drop(['Basins', 'Community'], axis=1)
-    df = df.apply(pd.to_numeric)
-    length = len(df.columns.values)
-    for col in df.columns.values:
-        df[col + "_z"] = stats.zscore(df[col])
-    for col in df.columns.values[length:]:
-        df = df[np.abs(df[col]) < thres]
-    # print('length 1: ', len(df))
-    df = df.drop(df.columns.values[length:], axis=1)
-    # print('length 2: ', len(df))
-    # if switch:
-    #     df = pd.concat([df, holdstrings], join='inner', axis=1)
-    return df
-
-
-def informed_outlierRm(df, thres=3, num=2):
-    df = df.dropna()
-    df = df.apply(pd.to_numeric)
-    length = len(df.columns.values)
-    keepIndexs = dict.fromkeys(df.index, 0)
-    for col in df.columns.values:
-        df[col + "_z"] = stats.zscore(df[col])
-    for col in df.columns.values[length:]:
-        index = list(df[np.abs(df[col]) > thres].index)
-        for i in index:
-            keepIndexs[str(i)] += 1
-    # ls = [key for key, val in enumerate(keepIndexs.items()) if val >= num]
-    ls = []
-    for key, val in enumerate(keepIndexs.items()):
-        if val[1] >= num:
-            ls.append(val[0])
-    df = df.drop(ls, axis=0)
-    df = df.drop(df.columns.values[length:], axis=1)
-    return df
-
-
-def outlierrm_outcome(df, thres, target):
-    df = df.dropna()
-    df[target + "_z"] = stats.zscore(df[target])
-    new_df = df[np.abs(df[target + "_z"]) < thres]
-    new_df = new_df.drop(target + "_z", axis=1)
-    return new_df
-
 def wrap_labels(ax, width, break_long_words=False):
     """
-    https://medium.com/dunder-data/automatically-wrap-graph-labels-in-matplotlib-and-seaborn-a48740bc9ce
-    :param ax:
-    :param width:
-    :param break_long_words:
-    :return:
+    From: https://medium.com/dunder-data/automatically-wrap-graph-labels-in-matplotlib-and-seaborn-a48740bc9ce
+
+    Wrap tick labels on the x-axis of a matplotlib Axes object to fit within a specified width.
+    The function takes an Axes object 'ax', the 'width' to wrap the labels, and an optional parameter
+    'break_long_words' to control whether long words should be broken at the width or kept intact.
+
+    @params:
+        ax (matplotlib Axes): The Axes object for which the tick labels will be wrapped.
+        width (int): The maximum width for the wrapped tick labels.
+        break_long_words (bool, optional): If True, long words will be broken at the width. Default is False.
+
+    Note:
+        This function modifies the x-axis tick labels of the provided Axes 'ax' in place.
+
+    Example usage:
+        fig, ax = plt.subplots()
+        ax.plot(x_data, y_data)
+        wrap_labels(ax, width=10, break_long_words=False)
+        plt.show()
     """
     labels = []
     for label in ax.get_xticklabels():
@@ -91,7 +63,26 @@ def wrap_labels(ax, width, break_long_words=False):
 
 # https://www.analyticsvidhya.com/blog/2020/10/a-comprehensive-guide-to-feature-selection-using-wrapper-methods-in-python/#:~:text=1.-,Forward%20selection,with%20all%20other%20remaining%20features.
 def backward_elimination(data, target, num_feats=5, significance_level=0.05):
-    # target = list(target)
+    """
+    Perform backward elimination for feature selection in a linear regression model.
+
+    The function takes a DataFrame 'data' containing the independent features, a Series 'target'
+    representing the dependent variable, an optional parameter 'num_feats' to specify the minimum
+    number of features to retain, and an optional 'significance_level' for the p-values.
+
+    @params:
+        data (DataFrame): The DataFrame containing the independent features.
+        target (Series): The Series representing the dependent variable.
+        num_feats (int, optional): The minimum number of features to retain. Default is 5.
+        significance_level (float, optional): The significance level for p-values. Default is 0.05.
+
+    @returns:
+        list: A list containing the selected features after backward elimination.
+
+    Note:
+        This function assumes that the 'data' DataFrame and 'target' Series are properly preprocessed
+        and do not contain any missing values.
+    """
     features = data.columns.tolist()
     while(len(features)>0):
         features_with_constant = sm.add_constant(data[features])
@@ -105,68 +96,60 @@ def backward_elimination(data, target, num_feats=5, significance_level=0.05):
     return features
 
 
-def unscaled_weights_from_full_standardization(X, y, bayesianReg: linear_model):
-    """
-    https://stackoverflow.com/questions/57513372/can-i-inverse-transform-the-intercept-and-coefficients-of-
-    lasso-regression-after
-    Better source:
-    https://stats.stackexchange.com/questions/74622/converting-standardized-betas-back-to-original-variables
-    """
-    a = bayesianReg.coef_
-
-    # Me tryna do my own thing
-    coefs_new = []
-    for x in range(len(X.columns)):
-        # print(X.columns.values[x])
-        col = X.columns.values[x]
-        coefs_new.append(((a[x] * float(y.std())) / (np.asarray(X.std()[col]))))
-    intercept = float(y.std()) - np.sum(np.multiply(np.asarray(coefs_new), np.asarray(X.mean())))  # hadamard product
-
-    return coefs_new, intercept
-
-
 def unscaled_weights_from_Xstandardized(X, bayesianReg: linear_model):
     """
+    Informed from:
     https://stackoverflow.com/questions/57513372/can-i-inverse-transform-the-intercept-and-coefficients-of-
-    lasso-regression-after
-    Better source:
     https://stats.stackexchange.com/questions/74622/converting-standardized-betas-back-to-original-variables
+
+    Get unscaled regression coefficients and the intercept from a Bayesian linear regression model
+    when the input data 'X' has undergone standardization but the target variable remains in its original scale.
+
+    The function takes a DataFrame 'X' containing the standardized independent features, and a Bayesian
+    linear regression model 'bayesianReg' trained on the original scale target variable.
+
+    @params:
+        X (DataFrame): The DataFrame containing the standardized independent features.
+        bayesianReg (linear_model): A trained Bayesian linear regression model.
+    @returns:
+        tuple: A tuple containing the unscaled regression coefficients and the intercept.
+
+    Note:
+        This function assumes that the 'X' DataFrame has been standardized, i.e., each column in 'X' has
+        a mean of 0 and a standard deviation of 1. The 'bayesianReg' model should be trained on the original
+        scale target variable, not on standardized targets.
     """
     a = bayesianReg.coef_
     i = bayesianReg.intercept_
     # Me tryna do my own thing
     coefs_new = []
     for x in range(len(X.columns)):
-        # print(X.columns.values[x])
         col = X.columns.values[x]
         coefs_new.append((a[x] / (np.asarray(X.std()[col]))))
     intercept = i - np.sum(np.multiply(np.asarray(coefs_new), np.asarray(X.mean()/X.std())))  # hadamard product
 
     return coefs_new, intercept
 
-
-def ln_transform_weights(coefs):
-    exp_coefs = np.exp(coefs)
-    # print(" exponential ", exp_coefs)
-    minus_coefs = exp_coefs - 1
-    # minus_coefs = [i - 1 for i in exp_coefs]
-    # print("Minus 1: ", minus_coefs)
-    new_coefs = minus_coefs * 100
-    # print(" multiply 100: ", new_coefs)
-    return new_coefs
-
-def log10_transform_weights(coefs):
-    """ Coefs must be a list"""
-    # exp_coefs = [10 ** w_i for w_i in coefs]
-    coefs = np.asarray(coefs)
-    exp_coefs = 10 ** coefs
-    minus_coefs = exp_coefs - 1
-    new_coefs = minus_coefs * 100
-    return list(new_coefs)
-
-
 def cv_results_and_plot(bay_model, bestfeatures, unscaled_predictor_matrix, predictor_matrix, target,
                         color_scheme: dict, marsh_key):
+    """
+    Perform cross-validation on a Bayesian linear regression model and provide various performance metrics
+    and visualizations related to the model's predictions and residuals.
+
+    @params:
+        bay_model (BayesianModel): The Bayesian linear regression model.
+        bestfeatures (list): The list of features selected by the feature selection process.
+        unscaled_predictor_matrix (DataFrame): DataFrame containing the unscaled predictor matrix.
+        predictor_matrix (DataFrame): DataFrame containing the scaled predictor matrix.
+        target (DataFrame): DataFrame containing the target variable.
+        color_scheme (dict): A dictionary containing color scheme for plots.
+        marsh_key (str): A string representing the marsh key.
+    @returns:
+         dict: A dictionary with holding the scaled and unscaled weight coefficients, unscaled intercepts, unscaled
+         regularization parameters, the number of well-determined weights, the standard deviation of teh predictions,
+         the predictions, the residuals, and predictions for the residuals.
+    """
+
     # Error Containers
     predicted = []  # holds they predicted values of y
     y_ls = []  # holds the true values of y
@@ -205,9 +188,7 @@ def cv_results_and_plot(bay_model, bestfeatures, unscaled_predictor_matrix, pred
             # collect unscaled parameters
             unscaled_weights, intercept = unscaled_weights_from_Xstandardized(unscaled_predictor_matrix[bestfeatures],
                                                                               bay_model)
-            # # Log10 transform the weights (since log10 is used on dependent variable)
-            # unscaled_transformed_weights = log10_transform_weights(unscaled_weights)
-            # # save
+            # save
             unscaled_w_ls.append(unscaled_weights)
 
             intercept_ls.append(intercept)
@@ -225,8 +206,6 @@ def cv_results_and_plot(bay_model, bestfeatures, unscaled_predictor_matrix, pred
             w_certain.append(weight_certainty)
             # Make our predictions for y
             ypred, ystd = bay_model.predict(X_test, return_std=True)
-            # Save average std on each prediction
-            #         pred_certain.append(np.mean(ystd))
 
             pred_list += list(ypred)
             pred_certain += list(ystd)
@@ -235,7 +214,6 @@ def cv_results_and_plot(bay_model, bestfeatures, unscaled_predictor_matrix, pred
             r2_ls.append(r2)
             mae = mean_absolute_error(y_test, ypred)
             mae_ls.append(mae)
-
 
         # Average certainty in predictions
         prediction_certainty_ls.append(np.mean(pred_certain))
@@ -261,9 +239,6 @@ def cv_results_and_plot(bay_model, bestfeatures, unscaled_predictor_matrix, pred
     r2_final_median = np.mean(r2_total_means)
     mae_final_median = np.mean(mae_total_means)
 
-    # exp10_y_ls = [10 ** y_i for y_i in y_ls]
-    # exp10_predicted = [10 ** y_i for y_i in predicted]
-
     plt.rcParams.update({'font.size': 16})
     fig, ax = plt.subplots(figsize=(9, 8))
     hb = ax.hexbin(x=y_ls,
@@ -279,8 +254,6 @@ def cv_results_and_plot(bay_model, bestfeatures, unscaled_predictor_matrix, pred
     cb.ax.get_yaxis().labelpad = 20
     cb.set_label('Density of Predictions', rotation=270, fontsize=21)
 
-    # exp10_y = 10 ** target
-
     ax.plot([target.min(), target.max()], [target.min(), target.max()],
             color_scheme['line'], lw=3)
 
@@ -295,7 +268,6 @@ def cv_results_and_plot(bay_model, bestfeatures, unscaled_predictor_matrix, pred
     #             dpi=300,
     #             bbox_inches='tight')
     plt.show()
-
 
     # save all results in a dictionary
     dictionary = {
