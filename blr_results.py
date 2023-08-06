@@ -25,12 +25,6 @@ wl = pd.read_csv(url_wl, encoding="unicode escape")[['Station_ID', 'Tide_Amp (ft
 wl['Simple site'] = [i[:8] for i in wl['Station_ID']]
 wl = wl.groupby('Simple site').median()
 
-## Data from Gee and Arc
-url_jrc = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/CRMS_GEE_JRCCOPY2.csv"
-jrc = pd.read_csv(url_jrc, encoding="unicode_escape")[
-    ['Simple_sit', 'Land_Lost_m2']
-].set_index('Simple_sit')
-
 url_gee = "https://raw.githubusercontent.com/EChenevert/for_publication2023/main/CRMS_GEE60pfrom2007to2022.csv"
 gee = pd.read_csv(url_gee, encoding="unicode escape")[['Simple_sit', 'NDVI', 'tss_med', 'windspeed']]\
     .groupby('Simple_sit').median().fillna(0)  # filling nans with zeros cuz all nans are in tss because some sites are not near water
@@ -56,7 +50,7 @@ floodDepth = pd.read_csv(url_floodDepth, encoding="unicode_escape")[[
 ]].set_index('Simple site')
 
 # Concatenate
-df = pd.concat([bysite, distRiver, nearWater, gee, jrc, wl, perc, floodfreq, floodDepth],
+df = pd.concat([bysite, distRiver, nearWater, gee, wl, perc, floodfreq, floodDepth],
                axis=1, join='outer')
 
 # Now clean the columns
@@ -86,12 +80,12 @@ des = udf.describe()  # just to identify which variables are way of the scale
 udf['distance_to_river_km'] = udf['distance_to_river_m']/1000  # convert to km
 udf['river_width_mean_km'] = udf['width_mean']/1000
 udf['distance_to_water_km'] = udf['Distance_to_Water_m']/1000
-udf['land_lost_km2'] = udf['Land_Lost_m2']*0.000001  # convert to km2
 
 # Drop remade variables
 udf = udf.drop(['distance_to_river_m', 'width_mean', 'Distance_to_Water_m',
                 'Soil Specific Conductance (uS/cm)',
-                'Land_Lost_m2'], axis=1)
+                # 'Land_Lost_m2'
+                ], axis=1)
 udf = udf.rename(columns={'tss_med': 'TSS (mg/L)'})
 
 # Delete the swamp sites and unammed basin
@@ -106,7 +100,6 @@ udf = udf.drop([
     'Average Height Herb (cm)',
     'Organic Density (g/cm3)',
     'Soil Moisture Content (%)',
-    'land_lost_km2'
 ], axis=1)
 # conduct outlier removal which drops all nans
 rdf = funcs.max_interquartile_outlierrm(udf.drop(['Community', 'Latitude', 'Longitude', 'Bulk Density (g/cm3)',
@@ -123,7 +116,6 @@ rdf = rdf.rename(columns={
     'Tide_Amp (ft)': 'Tide Amp (ft)',
     'avg_percentflooded (%)': 'Avg. Time Flooded (%)',
     'windspeed': 'Windspeed (m/s)',
-    # 'log_distance_to_ocean_km': 'Log Distance to Ocean (km)',
     'log_distance_to_water_km': 'Log Distance to Water (km)',
     'log_distance_to_river_km': 'Log Distance to River (km)',
     # My flood depth vars

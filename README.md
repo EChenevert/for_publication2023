@@ -14,7 +14,7 @@ CRMS_Discrete_Hydrographic.csv: Contains monthly averages of hourly measurements
 
 CRMS_GEE60pfrom2007to2022.csv: Dataset compiled from google earth engine and ...
 
-CRMS_GEE_JRCCOPY2.csv: Dataset compiled primarily from ....
+CRMS_GEE_JRCCOPY2.csv: Dataset compiled from ArcMap. This dataset is primarily used for the variables 
 
 CRMS_Marsh_Vegetation: Dataset of descriptions regarding the vegetation around nearby a CRMS station. This is openly available at https://cims.coastal.louisiana.gov/ and https://www.lacoast.gov/CRMS/
 
