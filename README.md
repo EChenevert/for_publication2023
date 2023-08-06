@@ -36,4 +36,25 @@ Accretion rates are derived in this file along with averages of hydrologic data,
 funcs.py: This script is used to hold any functions called in other files within the project.
 
 BLR_results.py: Here we load the files compiled in main.py as well as files compiled elsewhere in google earth engine 
-and ArcMap. 
+and ArcMap. Then we run the Bayesian Linear regression portion of the study, printing all plots used in the 
+investigation.
+
+GPR_results.py: We load the files ompiled in main.py as well as files compiled elsewhere in google earth engine 
+and ArcMap. Then we run the Gaussian Process regression portion of the study, with all relevant plots.
+
+dask_hydro.py: This file was used in the preprocessing of the hourly hydrologic data, since the original data was too 
+large to handle. Here we split the dataset into smaller, more manageable chunks.
+
+compute_hydro_hourly_vars.py: Here is where we calculate the flood frequency and flood depth variables from the 
+hydrologic data split in dask_hydro.py. 
+
+final_average_hourly_vars.py: Here we average the hourly hydrologic variables per site to make a final dataset of hourly 
+hydrologic variables.
+
+data_vis_paper.py: Here we simply make visualizations and some exploratory work our final dataset used for the machine 
+learning experiments.
+
+explore_NDVI_Biomass.py: Used to make plots of NDVI versus organic matter % and aboveground biomass. The aboveground 
+biomass data is taken from the Coastal Information Monitoring System website and is freely available.
+
+
