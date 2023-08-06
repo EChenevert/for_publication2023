@@ -14,8 +14,6 @@ CRMS_Discrete_Hydrographic.csv: Contains monthly averages of hourly measurements
 
 CRMS_GEE60pfrom2007to2022.csv: Dataset compiled from google earth engine and ...
 
-CRMS_GEE_JRCCOPY2.csv: Dataset compiled from ArcMap. This dataset is primarily used for the variables 
-
 CRMS_Marsh_Vegetation: Dataset of descriptions regarding the vegetation around nearby a CRMS station. This is openly available at https://cims.coastal.louisiana.gov/ and https://www.lacoast.gov/CRMS/
 
 CRMS Soil Properties: Dataset of sedimentologic characteristics taken from cores upon site initialization and subsequently every 6 to 10 years. This is openly available at https://cims.coastal.louisiana.gov/ and https://www.lacoast.gov/CRMS/
@@ -53,6 +51,8 @@ hydrologic variables.
 
 data_vis_paper.py: Here we simply make visualizations and some exploratory work our final dataset used for the machine 
 learning experiments.
+
+data_vis_for_GPR.py: In this file we create some figures used in the GPR results.
 
 explore_NDVI_Biomass.py: Used to make plots of NDVI versus organic matter % and aboveground biomass. The aboveground 
 biomass data is taken from the Coastal Information Monitoring System website and is freely available.
