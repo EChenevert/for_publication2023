@@ -2,7 +2,9 @@
 
 ## Directions for Use
 
-
+To replicate the study, run the BLR_results.py file for the Bayesian Linear regression portion of the study. For the 
+Gaussian Process regression portion of the study, run GPR_results file. Make sure to download all .py files in the same 
+repository. Particularly, the main.py and funcs.py files.
 
 ## Descriptions of Datasets
 
@@ -28,3 +30,10 @@ percentflooded.csv: Dataset taken from https://www.lacoast.gov/CRMS/ calculated 
 
 ## Descriptions of .py files
 
+main.py: This file is used to compile the raw data from the Coastal Information Management System website. 
+Accretion rates are derived in this file along with averages of hydrologic data, soil properties, and marsh vegetation.
+
+funcs.py: This script is used to hold any functions called in other files within the project.
+
+BLR_results.py: Here we load the files compiled in main.py as well as files compiled elsewhere in google earth engine 
+and ArcMap. 
